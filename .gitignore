@@ -1,0 +1,6 @@
+.DS_Store
+*.tmp
+~$*
+.venv/
+node_modules/
+scratch/
