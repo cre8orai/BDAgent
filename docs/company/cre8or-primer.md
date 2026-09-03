@@ -56,7 +56,7 @@ with **volatile, event-shaped, or unproven demand** and **an audience they alrea
 a tour, a launch, a team's season, a creator's drop, a retailer's private-label test.
 They have the demand side solved and the supply side broken. Cre8or is the supply side.
 
-See [`projects/retail-gtm/00-brief/channel-model.md`](../../projects/retail-gtm/00-brief/channel-model.md).
+The channel model built on this lives in the `RetailGTM` repo.
 
 ## Known gaps in this primer
 
