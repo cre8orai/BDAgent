@@ -8,7 +8,7 @@ picking it up cold. It should take five minutes and leave you able to contribute
 The business development workspace for **Cre8or**. Strategy, research, and go-to-market
 work products, versioned so decisions are traceable and reusable. Not code.
 
-Retail go-to-market lives in the separate `RetailGTM` repo, parallel to this one.
+It holds multiple projects under `projects/`. Today there is one: `retail-gtm`.
 
 ## What Cre8or is (the 30-second version)
 
@@ -26,14 +26,51 @@ picture is in [`company/cre8or-primer.md`](company/cre8or-primer.md).
 
 ## What we're working on
 
-Business development. Retail / indirect GTM has moved to the `RetailGTM` repo.
+**`projects/retail-gtm`** — the indirect motion. Cre8or's direct sales approach reaches
+one brand owner at a time. This project designs how we sell *to* agencies, licensors and
+merch aggregators, so that *they* build Cre8or-made product lines for their own clients.
+
+The canonical deal shape: Fanatics buys from Cre8or and stands up a Taylor Swift beauty
+line for a stadium tour. Cre8or never touches the artist; Fanatics never touches a factory.
+Tours have hard dates and unknowable per-city demand, which is exactly the inventory bet
+the 12-to-50,000 model removes.
+
+Six intermediary segments are mapped in
+[`../projects/retail-gtm/00-brief/channel-model.md`](../projects/retail-gtm/00-brief/channel-model.md).
 
 ## Where things live
 
 ```
-docs/company/   what Cre8or is — shared factual base
-sessions/       a log per working session
+docs/company/       what Cre8or is — shared factual base
+projects/<name>/
+  00-brief/         charter and the model being proposed
+  01-research/      what's true, with sources
+  02-strategy/      what we decided to do about it
+  03-playbooks/     how the team executes
+  04-artifacts/     published decks and pages
+  05-pipeline/      named targets
+sessions/           a log per working session — see sessions/README.md
 ```
+
+## The state of play, honestly
+
+The strategy is **structurally complete and factually unfinished**. The segment map,
+positioning spine and operating model are drafted. The numbers underneath them are not.
+
+Blocking unknowns, all marked `[OPEN]` in the files:
+
+- **Unit economics at 12 / 500 / 5,000 / 50,000 units.** The single most important gap.
+  If the margin stack only closes at high volume, "start at 12" is a demo feature rather
+  than a business model, and the strategy changes.
+- **Real lead times** — concept to first shipment, reorder to restock.
+- **MoCRA liability** — who is the responsible person when product ships under a third
+  party's brand. Most likely reason a licensing deal dies.
+- **No reference programme yet.** Every partner asks "who else have you done this for?"
+  on the first call. There is currently no answer.
+
+These are answerable from documents and people Cre8or already has. See
+[`../projects/retail-gtm/01-research/README.md`](../projects/retail-gtm/01-research/README.md),
+section A.
 
 ## Source material not in this repo
 
