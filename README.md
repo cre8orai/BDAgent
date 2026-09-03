@@ -12,6 +12,12 @@ self-contained: brief, research, strategy, playbooks, and published artifacts.
 |---|---|---|
 | [`retail-gtm`](projects/retail-gtm/) | 🟡 Scaffolded — research next | Retail / indirect go-to-market: selling *through* agencies, licensors, and merch aggregators who build product lines for their own clients. |
 
+## Start here
+
+- [`docs/ONBOARDING.md`](docs/ONBOARDING.md) — five-minute brief for anyone (or any AI
+  session) picking this up cold.
+- [`sessions/`](sessions/) — log of what happened in each working session.
+
 ## Shared context
 
 - [`docs/company/cre8or-primer.md`](docs/company/cre8or-primer.md) — what Cre8or is,

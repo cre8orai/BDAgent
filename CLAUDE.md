@@ -36,3 +36,9 @@ still being able to tell what was known, what was assumed, and what was decided.
 
 Direct, commercial, specific. Written for people who buy and sell for a living.
 No filler, no adjectives doing the work that numbers should do.
+
+## Session logging
+
+Every working session gets a file in `sessions/` — what changed, what was decided, what's
+still open, what's next. Add a row to the table in `sessions/README.md`. Write it before
+finishing, not from memory later.
