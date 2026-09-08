@@ -1,0 +1,106 @@
+<title>Cre8or BD Command Centre</title>
+<style>
+:root {
+  --bg:#faf9f7; --panel:#fff; --ink:#16130f; --mute:#6b6259; --line:#e6e1da;
+  --accent:#b4531f; --ok:#2f6b4f; --warn:#a8761c; --bad:#a33232;
+  --okbg:#e8f2ec; --warnbg:#faf0dc; --badbg:#f8e8e6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:#131110; --panel:#1c1917; --ink:#f0ebe4; --mute:#a09689; --line:#2e2925;
+    --accent:#e08a4e; --ok:#7fc09c; --warn:#e0b062; --bad:#e08b80;
+    --okbg:#1b2b23; --warnbg:#2e2617; --badbg:#2e1c1a;
+  }
+}
+:root[data-theme="dark"] {
+  --bg:#131110; --panel:#1c1917; --ink:#f0ebe4; --mute:#a09689; --line:#2e2925;
+  --accent:#e08a4e; --ok:#7fc09c; --warn:#e0b062; --bad:#e08b80;
+  --okbg:#1b2b23; --warnbg:#2e2617; --badbg:#2e1c1a;
+}
+body { background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; margin:0; }
+.wrap { max-width:1180px; margin:0 auto; padding:40px 22px 80px; }
+header { border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:34px; }
+h1 { font-size:31px; margin:0 0 6px; letter-spacing:-.02em; }
+.tag { color:var(--mute); font-size:14px; margin:0; }
+h2 { font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--mute);
+     margin:44px 0 14px; padding-bottom:7px; border-bottom:1px solid var(--line); }
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px; }
+.stat { background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:16px 18px; }
+.stat.alert { border-color:var(--bad); }
+.stat .v { font-size:30px; font-weight:640; letter-spacing:-.02em; }
+.stat .l { font-size:13px; font-weight:600; margin-top:3px; }
+.stat .s { font-size:12px; color:var(--mute); }
+.agents { display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:11px; }
+.agent { background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:14px 15px; position:relative; }
+.agent h3 { margin:0; font-size:14px; letter-spacing:.02em; text-transform:uppercase; color:var(--accent); }
+.agent .who { margin:5px 0 0; font-size:13px; font-weight:600; }
+.agent .does { margin:3px 0 0; font-size:12px; color:var(--mute); }
+.agent .n { position:absolute; top:12px; right:14px; font-size:19px; font-weight:640; color:var(--mute); margin:0; }
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table { width:100%; border-collapse:collapse; font-size:13.5px; background:var(--panel);
+         border:1px solid var(--line); border-radius:9px; overflow:hidden; }
+th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.07em;
+      color:var(--mute); padding:10px 13px; border-bottom:1px solid var(--line); white-space:nowrap; }
+td { padding:11px 13px; border-bottom:1px solid var(--line); vertical-align:top; }
+tr:last-child td { border-bottom:0; }
+.sub { color:var(--mute); font-size:12px; display:block; }
+.quote { color:var(--mute); font-style:italic; }
+.pill { display:inline-block; padding:2px 9px; border-radius:99px; font-size:11.5px; font-weight:600; white-space:nowrap; }
+.pill.ok { background:var(--okbg); color:var(--ok); }
+.pill.warn { background:var(--warnbg); color:var(--warn); }
+.pill.bad { background:var(--badbg); color:var(--bad); }
+.empty { color:var(--mute); font-size:13.5px; background:var(--panel); border:1px dashed var(--line);
+          border-radius:9px; padding:20px; margin:0; }
+.gate { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
+         border-radius:0 9px 9px 0; padding:16px 20px; margin-top:14px; }
+.gate p { margin:0 0 8px; font-size:14px; }
+.gate p:last-child { margin:0; }
+code { background:var(--bg); border:1px solid var(--line); border-radius:4px; padding:1px 6px; font-size:12.5px; }
+footer { margin-top:52px; padding-top:16px; border-top:1px solid var(--line); color:var(--mute); font-size:12.5px; }
+</style>
+
+<div class="wrap">
+<header>
+  <h1>Cre8or BD Command Centre</h1>
+  <p class="tag">Six agents, one voice, nothing sent without David. Generated from
+  <code>agents/state/</code> at 08 Sep 2026, 13:46 — never edited by hand.</p>
+</header>
+
+<h2>Where things stand</h2>
+<div class="stats"><div class="stat"><div class="v">0</div><div class="l">Awaiting your approval</div><div class="s">drafts in the outbox</div></div><div class="stat"><div class="v">0</div><div class="l">Approved, not yet out</div><div class="s">ready for send.sh</div></div><div class="stat alert"><div class="v">2</div><div class="l">You owe, overdue</div><div class="s">promises past their date</div></div><div class="stat"><div class="v">1</div><div class="l">Follow-ups due</div><div class="s">threads past cadence</div></div><div class="stat"><div class="v">4</div><div class="l">Live conversations</div><div class="s">tracked</div></div><div class="stat"><div class="v">3</div><div class="l">People sourced</div><div class="s">with a warm path where known</div></div></div>
+
+<h2>The team</h2>
+<div class="agents"><div class="agent"><h3>Chief</h3><p class="who">orchestrator</p><p class="does">routes, briefs, enforces the gates</p><p class="n">4</p></div><div class="agent"><h3>Scout</h3><p class="who">who is worth a call</p><p class="does">people + the warm path in</p><p class="n">3</p></div><div class="agent"><h3>Ghost</h3><p class="who">the voice</p><p class="does">every outbound passes through it</p><p class="n">0</p></div><div class="agent"><h3>Opener</h3><p class="who">first touch</p><p class="does">LinkedIn and email</p><p class="n">0</p></div><div class="agent"><h3>Chaser</h3><p class="who">never lets a thread die</p><p class="does">cadence and channel switching</p><p class="n">1</p></div><div class="agent"><h3>Desk</h3><p class="who">inbound</p><p class="does">triage and what David owes</p><p class="n">3</p></div><div class="agent"><h3>Closer</h3><p class="who">money and next step</p><p class="does">pricing discipline, deal shape</p><p class="n">1</p></div></div>
+
+<h2>What you owe</h2>
+<div class="scroll"><table><thead><tr><th>Person</th><th>What</th><th>Your words</th><th>Due</th><th></th></tr></thead><tbody><tr><td>Rhys <span class="sub">St Johns Bay Rum</span></td><td>Feedback on Body Wash</td><td><span class="quote">“I will revert tomorrow!”</span></td><td>2026-08-31</td><td><span class="pill bad">8d late</span></td></tr><tr><td>Emma <span class="sub">[UNKNOWN]</span></td><td>Operations onboarding with Or and Katia</td><td><span class="quote">“we need to have the”</span></td><td>2026-09-05</td><td><span class="pill bad">3d late</span></td></tr><tr><td>Nate Cooper <span class="sub">Barrel VC</span></td><td>Materials / deck</td><td><span class="quote">“rather than rush the materials to you by EOD, I&#x27;ll get them to you shortly”</span></td><td>2026-09-07</td><td><span class="pill bad">1d late</span></td></tr></tbody></table></div>
+
+<h2>Waiting for your approval</h2>
+<p class="empty">No drafts. Run <code>bash agents/cycle.sh</code> to generate some.</p>
+
+<h2>Live conversations</h2>
+<div class="scroll"><table><thead><tr><th>Person</th><th>Thread</th><th>Channel</th><th>Touch</th><th>Waiting on</th><th>Last</th></tr></thead><tbody><tr><td>Jesse Gerson <span class="sub">Front Row Group</span></td><td>David Feuerstein (Cre8or) &lt;&gt; Front Row</td><td>email</td><td>touch 2</td><td><span class="pill ok">them</span></td><td>6d ago</td></tr><tr><td>Nate Cooper <span class="sub">Barrel VC</span></td><td>Nate &lt;&gt; Cre8or Intro</td><td>email</td><td>touch 3</td><td><span class="pill warn">david</span></td><td>5d ago</td></tr><tr><td>Noah Rosenblatt <span class="sub">BeautySpace</span></td><td>Cre8or &amp; BeautySpace</td><td>email</td><td>touch 1</td><td><span class="pill ok">them</span></td><td>0d ago</td></tr><tr><td>Monica Sultan <span class="sub">IWorld</span></td><td>IWorld - wellness assortment (Cre8or)</td><td>email</td><td>touch 1</td><td><span class="pill ok">them</span></td><td>0d ago</td></tr></tbody></table></div>
+
+<h2>People and the way in</h2>
+<div class="scroll"><table><thead><tr><th>Person</th><th>Company</th><th>Path</th><th>How</th><th>Why them</th><th>Stage</th></tr></thead><tbody><tr><td>Nate Cooper <span class="sub">Partner</span></td><td>Barrel VC</td><td><span class="pill ok">rank 1</span></td><td>Eddie Krule (Stout) introduced 2026-08-25; Nate replied same day asking for next week</td><td>Active Series A process; Eddie flagged fit with Nate&#x27;s focus areas</td><td><span class="pill ok">live</span></td></tr><tr><td>Noah Rosenblatt <span class="sub">[UNKNOWN]</span></td><td>BeautySpace</td><td><span class="pill ok">rank 1</span></td><td>David messaged on LinkedIn first, then escalated to email 2026-09-08</td><td>[UNKNOWN] — David has not recorded why BeautySpace matters</td><td><span class="pill ok">contacted</span></td></tr><tr><td>Jesse Gerson <span class="sub">Managing Director</span></td><td>Front Row Group</td><td><span class="pill ok">rank 2</span></td><td>Eddie Krule (Stout) introduced 2026-08-25; David replied 08-28 and followed up 09-02</td><td>Built and launched WYN Beauty for Serena Williams — assembles brands end-to-end and outsources exactly what Cre8or does</td><td><span class="pill ok">contacted</span></td></tr></tbody></table></div>
+
+<h2>Reasons to reach out, before they go stale</h2>
+<div class="scroll"><table><thead><tr><th>Company</th><th>Signal</th><th>Source</th><th>Expires</th><th>Used</th></tr></thead><tbody><tr><td>Front Row Group</td><td>Socium Media add-on acquisition</td><td>Eddie Krule email 2026-08-25</td><td>2026-09-30</td><td><span class="pill warn">no</span></td></tr><tr><td>Cre8or</td><td>David in NYC start of November</td><td>David&#x27;s own sent mail 2026-09-08</td><td>2026-11-08</td><td><span class="pill warn">partial</span></td></tr></tbody></table></div>
+
+<h2>The gate</h2>
+<div class="gate">
+  <p><strong>No agent here has a send tool.</strong> Every agent writes to
+  <code>agents/state/outbox.csv</code> with <code>status=draft</code> and stops.</p>
+  <p>David reviews with <code>bash agents/review.sh</code>, and only rows he marks
+  <code>approved</code> are ever transmitted — by <code>agents/send.sh</code>, in the
+  foreground, after he types <code>SEND</code>.</p>
+  <p>LinkedIn is capped at 8 messages per session, 40–90 seconds apart, and any
+  captcha or checkpoint stops the whole run rather than retrying.</p>
+</div>
+
+<footer>
+  Built by <code>agents/build_dashboard.py</code> after every run ·
+  <code>github.com/cre8orai/BDAgent</code> · voice derived from 287 of David's own
+  sent messages, Feb 2025 – Sep 2026
+</footer>
+</div>

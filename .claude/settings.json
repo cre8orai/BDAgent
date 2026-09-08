@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Read", "Edit", "Write", "Glob", "Grep",
+      "Bash(python3 agents/*.py:*)",
+      "Bash(python3 voice/ingest.py:*)",
+      "Bash(git add:*)", "Bash(git commit:*)", "Bash(git push:*)",
+      "Bash(git pull:*)", "Bash(git status:*)", "Bash(git log:*)", "Bash(git diff:*)",
+      "Bash(head:*)", "Bash(tail:*)", "Bash(wc:*)", "Bash(ls:*)", "Bash(date:*)",
+
+      "mcp__claude_ai_Gmail__search_threads",
+      "mcp__claude_ai_Gmail__get_thread",
+      "mcp__claude_ai_Gmail__get_message",
+      "mcp__claude_ai_Gmail__list_labels",
+      "mcp__claude_ai_Gmail__list_drafts",
+
+      "mcp__claude_ai_SuperClaud__people_search",
+      "mcp__claude_ai_SuperClaud__company_search",
+      "mcp__claude_ai_SuperClaud__search_capabilities",
+      "mcp__claude_ai_SuperClaud__jobs_search",
+      "mcp__claude_ai_SuperClaud__posts_search",
+      "mcp__claude_ai_SuperClaud__account_read",
+
+      "mcp__claude_ai_Vibe_Prospecting__fetch-entities",
+      "mcp__claude_ai_Vibe_Prospecting__match-business",
+      "mcp__claude_ai_Vibe_Prospecting__enrich-business",
+      "mcp__claude_ai_Vibe_Prospecting__autocomplete",
+
+      "WebFetch", "WebSearch"
+    ],
+    "deny": [
+      "mcp__claude_ai_Gmail__send_message",
+      "mcp__claude_ai_Gmail__reply",
+      "mcp__claude_ai_Gmail__forward",
+      "mcp__claude_ai_Gmail__trash_message",
+      "mcp__claude_ai_Gmail__trash_thread",
+      "mcp__claude-in-chrome__computer",
+      "mcp__claude-in-chrome__form_input",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_fill_form",
+      "Bash(agents/send.sh:*)",
+      "Bash(bash agents/send.sh:*)"
+    ]
+  }
+}

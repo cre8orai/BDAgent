@@ -1,0 +1,5 @@
+thread_id,person,company,channel,subject,last_touched,waiting_on,bucket,touch_number,cadence_days,owner,notes
+1a039dc2fd6856ad,Jesse Gerson,Front Row Group,email,David Feuerstein (Cre8or) <> Front Row,2026-09-02,them,needs-david,2,7,david,"Two touches. Escalation candidate: ask Eddie Krule to nudge"
+1a039cd372a42897,Nate Cooper,Barrel VC,email,Nate <> Cre8or Intro,2026-09-03,david,commitment,3,2,david,Materials promised — David owes
+1a07fff767919a5d,Noah Rosenblatt,BeautySpace,email,Cre8or & BeautySpace,2026-09-08,them,draftable,1,4,david,First touch sent
+1a043725ca884a54,Monica Sultan,IWorld,email,IWorld - wellness assortment (Cre8or),2026-09-08,them,draftable,1,4,david,"Samples sent, tracking chased. NYC November mentioned"

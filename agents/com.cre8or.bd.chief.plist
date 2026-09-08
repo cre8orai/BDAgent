@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.cre8or.bd.chief</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/david/GitHub/BDAgent/agents/run.sh</string>
+    <string>chief</string>
+  </array>
+  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>6</integer><key>Minute</key><integer>30</integer></dict>
+  <key>RunAtLoad</key><false/>
+  <key>StandardOutPath</key><string>/Users/david/GitHub/BDAgent/agents/logs/launchd-chief.out</string>
+  <key>StandardErrorPath</key><string>/Users/david/GitHub/BDAgent/agents/logs/launchd-chief.err</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/Users/david/.local/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin</string></dict>
+</dict>
+</plist>

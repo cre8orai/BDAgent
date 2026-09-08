@@ -8,6 +8,7 @@ Name files `YYYY-MM-DD-NN-short-slug.md`.
 
 | Date | Session | Focus | Outcome |
 |---|---|---|---|
+| 2026-09-08 | [01](2026-09-08-01-super-agent-build.md) | The super agent | Six agents that write as David; voice from 287 sent messages; approval gate; command centre |
 | 2026-09-03 | [02](2026-09-03-02-repo-structure-settled.md) | Repo structure | Settled on one repo, projects as subfolders |
 | 2026-09-03 | [01](2026-09-03-01-repo-setup-and-retail-gtm.md) | Repo setup + retail GTM scaffold | Repo created and pushed; GTM strategy drafted; browser control installed |
 

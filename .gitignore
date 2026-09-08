@@ -1,6 +1,14 @@
+# Raw mail and the derived corpus never leave this machine.
+# Only voice/STYLE.md — the extracted, non-identifying style guide — is committed.
+voice/raw/
+voice/corpus/
+voice/*.json
+
+# Run locks and scratch
+agents/state/.claim-*
+agents/state/.*.py
+agents/logs/*.log
+agents/logs/launchd-*
+
 .DS_Store
-*.tmp
-~$*
-.venv/
-node_modules/
-scratch/
+__pycache__/
