@@ -68,3 +68,11 @@ Status values used in the artifact and in this repo:
 
 A name that reaches `passed` keeps its reason. Reasons cluster, and the cluster tells us
 which of the three pitch directions is failing.
+
+## Artifact
+
+Live desk: https://claude.ai/code/artifact/f055b57c-69f5-4cd3-994b-c4b3ebc60523
+Pipeline, the 61-firm target list, and an evaluator that reads any new name against
+`00-cre8or-investor-dna.md` and returns a fit verdict, a pitch direction and an opening
+paragraph. Evaluations are stored on the artifact, so the list grows as names are tested.
+Keep the DNA brief and the artifact's embedded copy of it in sync.
