@@ -1,0 +1,455 @@
+<title>Cre8or BD Watch Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root {
+  --ground:#f1f3f1; --panel:#fdfdfc; --sunk:#e8ebe8;
+  --ink:#14191a; --mute:#5d6a68; --line:#d8ddda;
+  --accent:#1c5b4c; --accent-soft:#e2ede9;
+  --ok:#2c6a4d; --ok-bg:#e4efe8;
+  --warn:#8a6210; --warn-bg:#f6ecd8;
+  --bad:#93312c; --bad-bg:#f7e5e3;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:#0f1413; --panel:#171d1c; --sunk:#121817;
+    --ink:#e9eeeb; --mute:#8c9a96; --line:#28312f;
+    --accent:#66c3a6; --accent-soft:#17322b;
+    --ok:#7cc4a1; --ok-bg:#172b22;
+    --warn:#d6a856; --warn-bg:#2c2415;
+    --bad:#dd8b83; --bad-bg:#2d1b19;
+  }
+}
+:root[data-theme="dark"] {
+  --ground:#0f1413; --panel:#171d1c; --sunk:#121817;
+  --ink:#e9eeeb; --mute:#8c9a96; --line:#28312f;
+  --accent:#66c3a6; --accent-soft:#17322b;
+  --ok:#7cc4a1; --ok-bg:#172b22;
+  --warn:#d6a856; --warn-bg:#2c2415;
+  --bad:#dd8b83; --bad-bg:#2d1b19;
+}
+
+* { box-sizing:border-box; }
+body {
+  background:var(--ground); color:var(--ink);
+  font-family:var(--display); font-size:15px; line-height:1.55; margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:1240px; margin:0 auto; padding:34px 22px 70px; }
+
+/* ---- masthead ---- */
+header { display:flex; flex-wrap:wrap; align-items:flex-end; gap:20px 30px;
+         border-bottom:2px solid var(--ink); padding-bottom:16px; }
+h1 { font-family:var(--display); font-weight:700; font-size:clamp(25px,3.4vw,34px);
+     letter-spacing:-.025em; margin:0; text-wrap:balance; }
+.sub-title { color:var(--mute); font-size:14px; margin:5px 0 0; max-width:56ch; }
+.built { margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--mute);
+         text-align:right; line-height:1.7; }
+.built b { color:var(--accent); font-weight:600; }
+
+/* ---- section headings ---- */
+h2 { font-family:var(--mono); font-size:11px; font-weight:600; text-transform:uppercase;
+     letter-spacing:.16em; color:var(--mute); margin:0 0 12px;
+     display:flex; align-items:center; gap:12px; }
+h2::after { content:""; flex:1; height:1px; background:var(--line); }
+section { margin-top:38px; }
+
+/* ---- tiles: only actionable figures ---- */
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px;
+         background:var(--line); border:1px solid var(--line); border-radius:3px; overflow:hidden; }
+.tile { background:var(--panel); padding:15px 17px 14px; display:flex; flex-direction:column; }
+.tile.live { background:var(--accent-soft); }
+.tile-v { font-family:var(--mono); font-weight:600; font-size:30px; line-height:1;
+          letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+.tile.live .tile-v { color:var(--accent); }
+.tile-l { font-size:13px; font-weight:600; margin-top:7px; }
+.tile-s { font-size:12px; color:var(--mute); margin-top:1px; }
+
+/* ---- two-column body ---- */
+.cols { display:grid; grid-template-columns:minmax(0,1fr) 268px; gap:38px; align-items:start; margin-top:38px; }
+@media (max-width:940px) { .cols { grid-template-columns:minmax(0,1fr); } aside { position:static !important; } }
+aside { position:sticky; top:22px; }
+aside section:first-child { margin-top:0; }
+.main > section:first-child { margin-top:0; }
+
+/* ---- the roster: a shift board, not cards ---- */
+.roster { list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }
+.crew { border-bottom:1px solid var(--line); padding:11px 0 12px; }
+.crew-top { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.crew-name { font-family:var(--display); font-weight:700; font-size:13px;
+             letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+.crew-n { font-family:var(--mono); font-weight:600; font-size:15px;
+          font-variant-numeric:tabular-nums; color:var(--ink); }
+.crew-u { font-family:var(--display); font-weight:500; font-size:10.5px; color:var(--mute);
+          text-transform:uppercase; letter-spacing:.08em; margin-left:5px; }
+.crew-who { font-family:var(--serif); font-style:italic; font-size:14px; margin:3px 0 0; }
+.crew-does { font-size:12.5px; color:var(--mute); margin:1px 0 0; }
+
+/* ---- voice evidence ---- */
+.voice { list-style:none; margin:0; padding:0; }
+.vx { padding:12px 0 13px; border-bottom:1px solid var(--line); }
+.vx:last-child { border-bottom:0; }
+.vx-role { font-family:var(--mono); font-size:10.5px; text-transform:uppercase;
+           letter-spacing:.13em; color:var(--mute); }
+.vx-line { font-family:var(--serif); font-size:16px; line-height:1.45; margin:5px 0 0;
+           border-left:2px solid var(--accent); padding-left:12px; }
+.vx-note { font-size:12.5px; color:var(--mute); margin:5px 0 0 14px; }
+
+/* ---- tables ---- */
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch;
+          border:1px solid var(--line); border-radius:3px; background:var(--panel); }
+table { width:100%; border-collapse:collapse; font-size:13.5px; }
+th { text-align:left; font-family:var(--mono); font-size:10.5px; font-weight:600;
+     text-transform:uppercase; letter-spacing:.1em; color:var(--mute);
+     padding:10px 14px; background:var(--sunk); border-bottom:1px solid var(--line); white-space:nowrap; }
+td { padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+tr:last-child td { border-bottom:0; }
+td strong { font-weight:600; }
+.sub { display:block; color:var(--mute); font-size:12px; font-weight:400; }
+.sub-inline { color:var(--mute); font-size:12.5px; }
+.said { font-family:var(--serif); color:var(--mute); }
+.num { font-family:var(--mono); font-size:12.5px; font-variant-numeric:tabular-nums; }
+.chip { display:inline-block; padding:2px 9px; border-radius:2px; font-family:var(--mono);
+        font-size:11px; font-weight:600; white-space:nowrap; letter-spacing:.02em; }
+.chip.ok { background:var(--ok-bg); color:var(--ok); }
+.chip.warn { background:var(--warn-bg); color:var(--warn); }
+.chip.bad { background:var(--bad-bg); color:var(--bad); }
+.chip.neutral { background:var(--sunk); color:var(--mute); }
+.empty { color:var(--mute); font-size:13.5px; background:var(--panel);
+         border:1px dashed var(--line); border-radius:3px; padding:22px; margin:0; }
+
+/* ---- the gate ---- */
+.gate { background:var(--panel); border:1px solid var(--line);
+        border-top:3px solid var(--accent); border-radius:0 0 3px 3px; padding:22px 26px; }
+.gate h3 { font-family:var(--display); font-weight:700; font-size:19px; margin:0 0 10px;
+           letter-spacing:-.015em; }
+.gate p { margin:0 0 11px; max-width:70ch; }
+.gate p:last-child { margin:0; }
+.flow { font-family:var(--mono); font-size:12px; color:var(--mute); background:var(--sunk);
+        border-radius:2px; padding:13px 16px; margin:0 0 15px; overflow-x:auto;
+        white-space:pre; line-height:1.75; }
+.flow b { color:var(--accent); font-weight:600; }
+code { font-family:var(--mono); font-size:12.5px; background:var(--sunk);
+       border-radius:2px; padding:1px 5px; }
+/* ---- the dialogue surface ---- */
+.ask { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
+       border-radius:0 3px 3px 0; padding:17px 20px; margin-bottom:11px; }
+.ask.answered { border-left-color:var(--ok); opacity:.72; }
+.ask-who { font-family:var(--mono); font-size:10.5px; text-transform:uppercase;
+           letter-spacing:.13em; color:var(--accent); }
+.ask-q { font-family:var(--display); font-weight:600; font-size:16.5px; margin:6px 0 0;
+         letter-spacing:-.01em; text-wrap:balance; }
+.ask-why { font-family:var(--serif); font-size:14px; color:var(--mute); margin:7px 0 0;
+           max-width:72ch; }
+.ask-blocks { font-family:var(--mono); font-size:11px; color:var(--warn);
+              background:var(--warn-bg); display:inline-block; padding:2px 8px;
+              border-radius:2px; margin-top:9px; }
+.reply { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+textarea, input[type=text], select {
+  font-family:var(--display); font-size:14px; color:var(--ink); background:var(--ground);
+  border:1px solid var(--line); border-radius:3px; padding:9px 11px; width:100%;
+  resize:vertical; }
+textarea:focus, input:focus, select:focus { outline:2px solid var(--accent); outline-offset:1px; }
+button { font-family:var(--display); font-size:13px; font-weight:600; cursor:pointer;
+         border:1px solid var(--line); background:var(--panel); color:var(--ink);
+         border-radius:3px; padding:8px 15px; }
+button:hover { border-color:var(--accent); }
+button:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+button.primary { background:var(--accent); border-color:var(--accent); color:var(--panel); }
+button.danger:hover { border-color:var(--bad); color:var(--bad); }
+button[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:var(--panel); }
+.said-back { font-family:var(--serif); font-size:14.5px; margin:10px 0 0; padding:9px 13px;
+             background:var(--ok-bg); color:var(--ok); border-radius:3px; }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:3px;
+        padding:17px 20px; margin-bottom:11px; }
+.card.decided { opacity:.66; }
+.card-top { display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+            flex-wrap:wrap; }
+.card-who { font-weight:600; font-size:15px; }
+.card-meta { font-family:var(--mono); font-size:11px; color:var(--mute); }
+.card-note { font-family:var(--mono); font-size:11.5px; color:var(--warn);
+             background:var(--warn-bg); padding:6px 10px; border-radius:2px; margin:9px 0 0; }
+.card-body { font-family:var(--serif); font-size:15px; line-height:1.5; white-space:pre-wrap;
+             margin:11px 0 0; padding:12px 15px; background:var(--ground);
+             border-radius:3px; border:1px solid var(--line); }
+.verdict { font-family:var(--mono); font-size:11px; font-weight:600; padding:3px 9px;
+           border-radius:2px; }
+.verdict.approve { background:var(--ok-bg); color:var(--ok); }
+.verdict.kill { background:var(--bad-bg); color:var(--bad); }
+.verdict.edit { background:var(--warn-bg); color:var(--warn); }
+.offline { font-family:var(--mono); font-size:12px; color:var(--warn);
+           background:var(--warn-bg); border-radius:3px; padding:11px 15px; margin:0 0 14px; }
+footer { margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
+         color:var(--mute); font-size:12.5px; font-family:var(--mono); line-height:1.8; }
+</style>
+
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Cre8or BD Watch Board</h1>
+    <p class="sub-title">Six agents work under David. They ask him when they are stuck,
+    draft in his voice when they are not, and send nothing to anyone. Answer, decide and
+    direct them here — it is read back before the next run.</p>
+  </div>
+  <p class="built">built <b>08 September 2026 · 20:11</b><br>cre8orai/BDAgent</p>
+</header>
+
+<section>
+  <h2>Needs a decision</h2>
+  <div class="tiles"><div class="tile live"><span class="tile-v">4</span><span class="tile-l">questions for you</span><span class="tile-s">agents are blocked on these</span></div><div class="tile live"><span class="tile-v">8</span><span class="tile-l">drafts to decide</span><span class="tile-s">approve, kill, or send back</span></div><div class="tile live"><span class="tile-v">4</span><span class="tile-l">you owe, overdue</span><span class="tile-s">promises past the date you gave</span></div><div class="tile live"><span class="tile-v">1</span><span class="tile-l">follow-ups due</span><span class="tile-s">threads past their cadence</span></div></div>
+</section>
+
+<div class="cols">
+<div class="main">
+
+  <section>
+    <h2>What you owe</h2>
+    <div class="scroll"><table><thead><tr><th>Person</th><th>What</th><th>Your own words</th><th>Due</th><th></th></tr></thead><tbody><tr><td><strong>Rhys</strong><span class="sub">St Johns Bay Rum</span></td><td>Feedback on Body Wash</td><td><span class="said">“I will revert tomorrow!”</span></td><td><span class="num">2026-08-31</span></td><td><span class="chip bad">8 days late</span></td></tr><tr><td><strong>Emma</strong><span class="sub">[UNKNOWN]</span></td><td>Operations onboarding with Or and Katia</td><td><span class="said">“we need to have the”</span></td><td><span class="num">2026-09-05</span></td><td><span class="chip bad">3 days late</span></td></tr><tr><td><strong>Nate Cooper</strong><span class="sub">Barrel VC</span></td><td>Materials / deck</td><td><span class="said">“rather than rush the materials to you by EOD, I&#x27;ll get them to you shortly”</span></td><td><span class="num">2026-09-07</span></td><td><span class="chip bad">1 days late</span></td></tr><tr><td><strong>Chen Kaplan</strong><span class="sub">Rhodium</span></td><td>Next-week meeting times</td><td><span class="said">“I will coordinate for next week”</span></td><td><span class="num">2026-09-08</span></td><td><span class="chip ok">open</span></td></tr><tr><td><strong>Avery Schwartz</strong><span class="sub">Cre8or (new hire)</span></td><td>Office address for first day</td><td><span class="said">“[they asked, you have not answered]”</span></td><td><span class="num">2026-09-08</span></td><td><span class="chip ok">open</span></td></tr></tbody></table></div>
+  </section>
+
+  <section id="asks-section">
+    <h2>Your agents are asking you</h2>
+    <div id="offline" class="offline" hidden>Read-only right now — answers can't be
+    saved from this view. Everything below is still current.</div>
+    <div id="asks"></div>
+  </section>
+
+  <section>
+    <h2>Drafts — approve, kill, or send back</h2>
+    <div id="drafts"></div>
+  </section>
+
+  <section>
+    <h2>Tell an agent what to do</h2>
+    <div class="card">
+      <div class="reply">
+        <select id="dir-agent" aria-label="Which agent" style="max-width:170px"></select>
+        <input type="text" id="dir-text" style="flex:1;min-width:240px"
+               placeholder="e.g. stop chasing Front Row entirely, or find me medspa franchisors in Texas">
+        <button class="primary" id="dir-send">Send it</button>
+      </div>
+      <div id="dir-log"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Live conversations</h2>
+    <div class="scroll"><table><thead><tr><th>Person</th><th>Thread</th><th>Channel</th><th>Touch</th><th>Waiting on</th><th>Last</th></tr></thead><tbody><tr><td><strong>Jesse Gerson</strong><span class="sub">Front Row Group</span></td><td>David Feuerstein (Cre8or) &lt;&gt; Front Row</td><td><span class="num">email</span></td><td><span class="num">2</span></td><td><span class="chip ok">them</span></td><td><span class="num">6d</span></td></tr><tr><td><strong>Nate Cooper</strong><span class="sub">Barrel VC</span></td><td>Nate &lt;&gt; Cre8or Intro</td><td><span class="num">email</span></td><td><span class="num">3</span></td><td><span class="chip warn">you</span></td><td><span class="num">5d</span></td></tr><tr><td><strong>Noah Rosenblatt</strong><span class="sub">BeautySpace</span></td><td>Cre8or &amp; BeautySpace</td><td><span class="num">email</span></td><td><span class="num">1</span></td><td><span class="chip ok">them</span></td><td><span class="num">0d</span></td></tr><tr><td><strong>Monica Sultan</strong><span class="sub">IWorld</span></td><td>IWorld - wellness assortment (Cre8or)</td><td><span class="num">email</span></td><td><span class="num">1</span></td><td><span class="chip ok">them</span></td><td><span class="num">0d</span></td></tr></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>People, and the way in</h2>
+    <div class="scroll"><table><thead><tr><th>Person</th><th>Company</th><th>Path</th><th>How</th><th>Why them, why now</th><th>Stage</th></tr></thead><tbody><tr><td><strong>Nate Cooper</strong><span class="sub">Partner</span></td><td>Barrel VC</td><td><span class="chip ok">path 1</span></td><td>Eddie Krule (Stout) introduced 2026-08-25; Nate replied same day asking for next week</td><td>Active Series A process; Eddie flagged fit with Nate&#x27;s focus areas</td><td><span class="chip neutral">live</span></td></tr><tr><td><strong>Noah Rosenblatt</strong><span class="sub">[UNKNOWN]</span></td><td>BeautySpace</td><td><span class="chip ok">path 1</span></td><td>David messaged on LinkedIn first, then escalated to email 2026-09-08</td><td>[UNKNOWN] — David has not recorded why BeautySpace matters</td><td><span class="chip neutral">contacted</span></td></tr><tr><td><strong>Judah Abraham</strong><span class="sub">Founder and CEO</span></td><td>Slate Brands</td><td><span class="chip ok">path 1</span></td><td>1st-degree. 14 LinkedIn messages, a Zoom was booked</td><td>RetailGTM scored Slate Brands TAKE. A meeting was scheduled and missed on a crossed wire — never rebooked</td><td><span class="chip neutral">dropped</span></td></tr><tr><td><strong>Ralph Azrak</strong><span class="sub">Co-Founder and GM</span></td><td>AS Beauty</td><td><span class="chip ok">path 1</span></td><td>1st-degree. Met in person in NYC, samples shipped</td><td>RetailGTM scored AS Beauty TAKE. A buyer whose team was &quot;excited&quot; asked a direct question</td><td><span class="chip neutral">dropped</span></td></tr><tr><td><strong>Jesse Gerson</strong><span class="sub">Managing Director</span></td><td>Front Row Group</td><td><span class="chip ok">path 2</span></td><td>Eddie Krule (Stout) introduced 2026-08-25; David replied 08-28 and followed up 09-02</td><td>Built and launched WYN Beauty for Serena Williams — assembles brands end-to-end and outsources exactly what Cre8or does</td><td><span class="chip neutral">contacted</span></td></tr><tr><td><strong>Matt Beer</strong><span class="sub">President</span></td><td>Front Row Group</td><td><span class="chip warn">path 4</span></td><td>1st-degree LinkedIn connection. David messaged him direct 2026-07-16, no reply</td><td>President of Front Row. The SECOND door into an account where Jesse Gerson has gone quiet after two emails</td><td><span class="chip neutral">contacted</span></td></tr><tr><td><strong>Will Baumann</strong><span class="sub">Co-founder and CEO</span></td><td>Fourthwall</td><td><span class="chip warn">path 4</span></td><td>1st-degree. One LinkedIn message 2026-01-11, no reply</td><td>RetailGTM scored Fourthwall TAKE. Creator storefront platform — its customers are exactly who needs 12-unit runs</td><td><span class="chip neutral">contacted</span></td></tr></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>Reasons to write, before they go stale</h2>
+    <div class="scroll"><table><thead><tr><th>Company</th><th>Signal</th><th>Source</th><th>Expires</th><th></th></tr></thead><tbody><tr><td><strong>Front Row Group</strong></td><td>Socium Media add-on acquisition</td><td><span class="sub-inline">Eddie Krule email 2026-08-25</span></td><td><span class="num">2026-09-30</span></td><td><span class="chip warn">no</span></td></tr><tr><td><strong>Cre8or</strong></td><td>David in NYC start of November</td><td><span class="sub-inline">David&#x27;s own sent mail 2026-09-08</span></td><td><span class="num">2026-11-08</span></td><td><span class="chip warn">partial</span></td></tr></tbody></table></div>
+  </section>
+
+</div>
+
+<aside>
+  <section>
+    <h2>On watch</h2>
+    <ul class="roster"><li class="crew"><div class="crew-top"><span class="crew-name">Chief</span><span class="crew-n">4<span class="crew-u">threads</span></span></div><p class="crew-who">at his desk on Monday</p><p class="crew-does">routes, briefs, asks you things</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Scout</span><span class="crew-n">7<span class="crew-u">people</span></span></div><p class="crew-who">the prospector</p><p class="crew-does">who is worth a call, and the way in</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Ghost</span><span class="crew-n">8<span class="crew-u">written</span></span></div><p class="crew-who">the writer</p><p class="crew-does">every outbound passes through it</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Opener</span><span class="crew-n">0<span class="crew-u">opened</span></span></div><p class="crew-who">at the handshake</p><p class="crew-does">first touch, LinkedIn and email</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Chaser</span><span class="crew-n">1<span class="crew-u">due</span></span></div><p class="crew-who">who won&#x27;t let a thread die</p><p class="crew-does">cadence, channel, when to stop</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Desk</span><span class="crew-n">5<span class="crew-u">tracked</span></span></div><p class="crew-who">at 6am with coffee</p><p class="crew-does">inbound, and what he owes</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Closer</span><span class="crew-n">1<span class="crew-u">at stake</span></span></div><p class="crew-who">in the negotiation</p><p class="crew-does">price floor, deal shape, next step</p></li></ul>
+  </section>
+
+  <section>
+    <h2>Whose voice</h2>
+    <ul class="voice"><li class="vx"><span class="vx-role">the greeting</span><p class="vx-line">Jesse hello</p><p class="vx-note">his name-on-its-own-line opener, not “Hi Jesse,”</p></li><li class="vx"><span class="vx-role">the follow-up</span><p class="vx-line">Millie following up again... have time to speak next week?</p><p class="vx-note">10–25 words. his verb is “bump”, never “circle back”</p></li><li class="vx"><span class="vx-role">the close</span><p class="vx-line">Let&#x27;s Cre8!</p><p class="vx-note">ends essentially every message he sends</p></li><li class="vx"><span class="vx-role">the restraint</span><p class="vx-line">I would love to learn a bit more about BeautySpace and share elements of Cre8or with you.</p><p class="vx-note">43-word first touch. he does not pitch — he offers to, on a call</p></li><li class="vx"><span class="vx-role">the manners</span><p class="vx-line">Eddie thanks for the intro.</p><p class="vx-note">the introducer is thanked by name, then moved to BCC</p></li></ul>
+  </section>
+</aside>
+</div>
+
+<section>
+  <h2>How this works</h2>
+  <div class="gate">
+    <h3>They ask. You decide. Nothing reaches anyone without you.</h3>
+    <p class="flow">Scout · Desk · Chaser · Closer          blocked? ──► a <b>QUESTION</b>
+      └─► <b>GHOST</b> (the voice)                                    │
+            └─► a <b>DRAFT</b> ─────────────────────┐                 │
+                                                    ▼                 ▼
+                                        <b>YOU</b>, on this page · BizDave · your email
+                                                    │
+                    approve ─┬─ kill ─┬─ send back ─┴─ or just tell an agent what to do
+                             │        │
+                             ▼        ▼
+              a Gmail <b>DRAFT</b>    the agent rewrites it
+              <b>you</b> press Send</p>
+    <p><strong>This page is where the conversation happens.</strong> When an agent is
+    blocked it asks rather than guesses, and the question appears at the top with the
+    draft it is holding up. Answer it and the agent acts on the answer. Approve, kill or
+    send a draft back with a note, or skip all of that and just tell an agent what to
+    do — every one of those is read back before the next run.</p>
+    <p>Approved rows become real Gmail drafts sitting in David's Gmail until he presses
+    Send himself. <code>send.sh</code> was deleted from the tree on 8 September —
+    removed, not disabled — and no flag or variable brings it back. The one exception is
+    the morning brief, which goes to David and nobody else.</p>
+    <p>Enforced in three places, so losing one opens no hole: no script calls a send
+    tool; the scheduled permission profile denies sending <em>and</em> drafting, so a
+    scheduled agent writes CSV and stops; the drafting profile allows only
+    <code>create_draft</code>.</p>
+    <p><strong>LinkedIn is read-only to every agent.</strong> The 2,558-message archive
+    and the 7,246-person connection graph are read. Nothing opens linkedin.com, clicks,
+    or types — LinkedIn drafts are listed for David to paste by hand.</p>
+  </div>
+</section>
+
+<footer>
+  regenerated by agents/build_dashboard.py after every run<br>
+  voice derived from 287 of David's own sent messages · Feb 2025 – Sep 2026<br>
+  github.com/cre8orai/BDAgent
+</footer>
+</div>
+
+<script id="bd-data" type="application/json">{"generated": "2026-09-08T20:11", "questions": [{"id": "q-0001", "agent": "desk", "about": "Avery Schwartz — new hire", "question": "What is the office address Avery should go to?", "why": "Their first day is today and they asked on Sep 4. The only address in your sent mail is the registered company address (Hazorea 2 Ofakim) and sending a new hire to the wrong site is not a guess worth making. The reply is written and waiting on this one line.", "blocking": "bd-0007"}, {"id": "q-0002", "agent": "desk", "about": "Ralph Azrak — AS Beauty", "question": "Did the clinical documentation ever go out to AS Beauty?", "why": "April 2024: samples shipped, his team was 'excited', he asked for the clinical docs and the thread stops. Nothing in Gmail or LinkedIn — but WhatsApp is invisible to this system so I will not assume you dropped it. If it went, the draft's second sentence is wrong and should be cut.", "blocking": "bd-0005"}, {"id": "q-0003", "agent": "chaser", "about": "Front Row Group", "question": "Jesse or Matt Beer — which door do you want worked?", "why": "Jesse Gerson has had two emails and gone quiet. Matt Beer is President and a 1st-degree connection you messaged in July. Working both in the same week reads as pressure and Gate 3 forbids it. Your call which one.", "blocking": "bd-0002"}, {"id": "q-0004", "agent": "closer", "about": "Slate Brands / AS Beauty", "question": "Both score TAKE — do you want these reopened as live deals?", "why": "Both are dropped threads rather than rejections, and both are 1st-degree. If yes, Closer will build a brief for each — which door, right-to-play score, kit, the price that clears — before any outreach goes out.", "blocking": ""}], "drafts": [{"id": "bd-0001", "agent": "desk", "person": "Nate Cooper", "company": "Barrel VC", "channel": "email", "subject": "Re: Nate <> Cre8or Intro", "body": "Nate\n\nApologies for the delay on the materials. Sending them through this week.\n\nAlso — we will all be in NYC at the start of November. Would be good to put a face to face in the diary if that is easier than Zoom.\n\nLet's Cre8!", "notes": "OVERDUE commitment. Reply on the existing thread. Does not promise a day you have not chosen", "blocked_by": null}, {"id": "bd-0002", "agent": "chaser", "person": "Jesse Gerson", "company": "Front Row Group", "channel": "email", "subject": "Re: David Feuerstein (Cre8or) <> Front Row", "body": "Jesse\n\nCongratulations on the Socium Media add-on.\n\nBumping this back up — we will all be in NYC at the start of November and I would welcome 20 minutes while we are there.\n\nLet's Cre8!", "notes": "Touch 3. Uses the Socium signal Eddie flagged and you have not used. Cadence says stop after touch 4", "blocked_by": "q-0003"}, {"id": "bd-0003", "agent": "chaser", "person": "Eddie Krule", "company": "Stout", "channel": "email", "subject": "Front Row", "body": "Eddie\n\nHope you are well, and thank you again for both intros — Nate and I are moving.\n\nJesse has gone quiet after two notes from me. Would you be willing to give him a light nudge? No pressure at all if the timing is wrong.\n\nLet's Cre8!", "notes": "The escalation chaser.md prescribes instead of a 4th message: go back through the introducer", "blocked_by": null}, {"id": "bd-0004", "agent": "desk", "person": "Judah Abraham", "company": "Slate Brands", "channel": "linkedin-message", "subject": "", "body": "Judah... I owe you an apology for April — we crossed wires on that Zoom and I never got it back in the diary.\n\nStill would love to reconnect. Have time this week or next?", "notes": "LinkedIn register: no sign-off, ellipsis, \"would love\". Recovers a booked meeting lost to a mixup, not a rejection", "blocked_by": null}, {"id": "bd-0005", "agent": "desk", "person": "Ralph Azrak", "company": "AS Beauty", "channel": "linkedin-message", "subject": "", "body": "Ralph... been too long. You asked for the clinical documentation back when we shipped the samples and I do not think I ever closed that loop properly.\n\nWe will all be in NYC at the start of November. Would love to pick this back up — worth a coffee?", "notes": "CHECK WITH DAVID FIRST — [UNKNOWN] whether the docs went via WhatsApp. If they did, cut the second sentence", "blocked_by": "q-0002"}, {"id": "bd-0006", "agent": "desk", "person": "Chen Kaplan", "company": "Rhodium", "channel": "email", "subject": "Re: Intro Chen <> David - The Largest Investor Office Hours", "body": "Chen\n\nApologies for the slow reply — Thursday unfortunately does not work on our end.\n\nCould we do early next week? Please feel free to grab whatever suits you: https://calendly.com/david-cre8or\n\nShana Tova\n\nLet's Cre8!", "notes": "INVESTOR. She proposed Thu Sep 10 10-12 on Sep 6 and has had no answer. You already told Jonathan Thursday does not work — she has not been told", "blocked_by": null}, {"id": "bd-0007", "agent": "desk", "person": "Avery Schwartz", "company": "Cre8or (new hire)", "channel": "email", "subject": "Re: Building location", "body": "Avery\n\nApologies — this got buried. Welcome aboard!\n\n[CONFIRM THE ADDRESS BEFORE SENDING]\n\nAny trouble finding it, call me on +972-54-440-9813.\n\nLet's Cre8!", "notes": "URGENT + NEEDS YOU. Asked Sep 4 for the office address for their first day \"this Tuesday\" — that is TODAY. Unanswered 4 days. I did not fill the address in: the only one in your sent mail is the registered company address (Hazorea 2, Ofakim) and sending a new hire to the wrong site is not a guess worth making", "blocked_by": "q-0001"}, {"id": "bd-0008", "agent": "desk", "person": "Gaby Reinert", "company": "Overjoy", "channel": "email", "subject": "Re: Our call on Wednesday", "body": "Gaby\n\nConfirmed for Wednesday 5pm Israel time. Looking forward to it.\n\nLet's Cre8!", "notes": "Simple confirmation. Low risk", "blocked_by": null}], "agents": ["Chief", "Scout", "Ghost", "Opener", "Chaser", "Desk", "Closer"]}</script>
+<script>
+(function () {
+  const DATA = JSON.parse(document.getElementById("bd-data").textContent);
+  const asksEl = document.getElementById("asks");
+  const draftsEl = document.getElementById("drafts");
+  const dirAgent = document.getElementById("dir-agent");
+  const dirText = document.getElementById("dir-text");
+  const dirSend = document.getElementById("dir-send");
+  const dirLog = document.getElementById("dir-log");
+  const offline = document.getElementById("offline");
+
+  let db = null;                       // set if this view can persist
+  const answers = new Map();           // questionId -> {text, at}
+  const verdicts = new Map();          // draftId    -> {verdict, note, at}
+  const directives = [];
+
+  const esc = (t) => { const d = document.createElement("div"); d.textContent = t ?? ""; return d.innerHTML; };
+  const when = (iso) => { try { return new Date(iso).toLocaleString(undefined,
+      {month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"}); } catch { return ""; } };
+
+  DATA.agents.forEach((a) => {
+    const o = document.createElement("option"); o.value = a; o.textContent = a; dirAgent.append(o);
+  });
+
+  // ---------- render ----------
+  function renderAsks() {
+    if (!DATA.questions.length) {
+      asksEl.innerHTML = '<p class="empty">Nothing blocked. Your agents have everything they need.</p>';
+      return;
+    }
+    asksEl.innerHTML = DATA.questions.map((q) => {
+      const a = answers.get(q.id);
+      return `<div class="ask ${a ? "answered" : ""}">
+        <span class="ask-who">${esc(q.agent)} &middot; ${esc(q.about)}</span>
+        <p class="ask-q">${esc(q.question)}</p>
+        <p class="ask-why">${esc(q.why)}</p>
+        ${q.blocking ? `<span class="ask-blocks">holding draft ${esc(q.blocking)}</span>` : ""}
+        ${a
+          ? `<p class="said-back">You said: ${esc(a.text)}<br><span class="card-meta">${when(a.at)}</span></p>`
+          : `<div class="reply">
+               <textarea rows="2" data-q="${esc(q.id)}" placeholder="Answer in your own words — the agent reads this and acts on it"></textarea>
+               <button class="primary" data-answer="${esc(q.id)}">Answer</button>
+             </div>`}
+      </div>`;
+    }).join("");
+  }
+
+  function renderDrafts() {
+    if (!DATA.drafts.length) {
+      draftsEl.innerHTML = '<p class="empty">No drafts waiting.</p>';
+      return;
+    }
+    draftsEl.innerHTML = DATA.drafts.map((d) => {
+      const v = verdicts.get(d.id);
+      const blocked = d.blocked_by && !answers.has(d.blocked_by);
+      return `<div class="card ${v ? "decided" : ""}">
+        <div class="card-top">
+          <span class="card-who">${esc(d.person)} <span class="card-meta">${esc(d.company)}</span></span>
+          <span class="card-meta">${esc(d.agent)} &middot; ${esc(d.channel)} &middot; ${esc(d.id)}</span>
+        </div>
+        ${d.notes ? `<p class="card-note">${esc(d.notes)}</p>` : ""}
+        ${blocked ? `<p class="card-note">Waiting on your answer above before this is safe to use.</p>` : ""}
+        <div class="card-body">${esc(d.body)}</div>
+        ${v
+          ? `<p class="said-back"><span class="verdict ${v.verdict}">${esc(v.verdict)}</span>
+               ${v.note ? " &mdash; " + esc(v.note) : ""}
+               <br><span class="card-meta">${when(v.at)}</span></p>`
+          : `<div class="reply">
+               <button class="primary" data-verdict="approve" data-id="${esc(d.id)}">Approve</button>
+               <button data-verdict="edit" data-id="${esc(d.id)}">Send back</button>
+               <button class="danger" data-verdict="kill" data-id="${esc(d.id)}">Kill</button>
+               <input type="text" data-note="${esc(d.id)}" style="flex:1;min-width:200px"
+                      placeholder="Optional — what to change, or why">
+             </div>`}
+      </div>`;
+    }).join("");
+  }
+
+  function renderDirectives() {
+    dirLog.innerHTML = directives.length
+      ? directives.map((d) => `<p class="said-back"><strong>${esc(d.agent)}</strong> &mdash;
+          ${esc(d.text)}<br><span class="card-meta">${when(d.at)}</span></p>`).join("")
+      : "";
+  }
+
+  renderAsks(); renderDrafts();
+
+  // ---------- persistence ----------
+  async function save(path, body) {
+    if (!db) return false;
+    try { await db.doc(path).set(body); return true; }
+    catch (e) { console.warn("save failed", path, e && e.code); return false; }
+  }
+
+  asksEl.addEventListener("click", async (ev) => {
+    const btn = ev.target.closest("[data-answer]");
+    if (!btn) return;
+    const id = btn.dataset.answer;
+    const box = asksEl.querySelector(`textarea[data-q="${id}"]`);
+    const text = (box && box.value || "").trim();
+    if (!text) { box && box.focus(); return; }
+    const rec = { questionId: id, text, at: new Date().toISOString() };
+    answers.set(id, rec); renderAsks(); renderDrafts();
+    await save("answers/" + id, rec);
+  });
+
+  draftsEl.addEventListener("click", async (ev) => {
+    const btn = ev.target.closest("[data-verdict]");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const noteEl = draftsEl.querySelector(`input[data-note="${id}"]`);
+    const rec = { draftId: id, verdict: btn.dataset.verdict,
+                  note: (noteEl && noteEl.value || "").trim(),
+                  at: new Date().toISOString() };
+    verdicts.set(id, rec); renderDrafts();
+    await save("decisions/" + id, rec);
+  });
+
+  dirSend.addEventListener("click", async () => {
+    const text = dirText.value.trim();
+    if (!text) { dirText.focus(); return; }
+    const rec = { agent: dirAgent.value, text, at: new Date().toISOString(), status: "new" };
+    directives.unshift(rec); dirText.value = ""; renderDirectives();
+    await save("directives/" + Date.now().toString(36), rec);
+  });
+
+  // ---------- come alive if the store is there ----------
+  (async () => {
+    db = (window.claude && claude.use) ? await claude.use("db") : null;
+    if (!db) { offline.hidden = false; return; }
+    try {
+      const [ans, dec, dir] = await Promise.all([
+        db.collection("answers").get(),
+        db.collection("decisions").get(),
+        db.collection("directives").orderBy("at", "desc").limit(20).get(),
+      ]);
+      ans.docs.forEach((d) => { const v = d.data(); if (v && v.questionId) answers.set(v.questionId, v); });
+      dec.docs.forEach((d) => { const v = d.data(); if (v && v.draftId) verdicts.set(v.draftId, v); });
+      dir.docs.forEach((d) => directives.push(d.data()));
+      renderAsks(); renderDrafts(); renderDirectives();
+    } catch (e) { console.warn("load failed", e && e.code); }
+  })();
+})();
+</script>

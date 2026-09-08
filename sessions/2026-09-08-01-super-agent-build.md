@@ -134,3 +134,45 @@ is exactly how a draft misfires. Real addresses where known, synthetic
 `agents/review.sh` also could never have run: it fed its Python through a heredoc, so
 stdin was the script and `input()` hit `EOFError` on the first keypress. Split into
 `agents/review.py`.
+
+---
+
+## Amended again — the missing half was the conversation
+
+David: *"You're asking me questions here that you should be asking me in the interface,
+in the artifact on the site, or sending me a message to my email... The whole goal here
+is not to totally automate everything, but to automate everything under me, so that I
+get updates, I can act on them, and I can make decisions as to whether or not they
+should be executed."*
+
+He was right, and it was a design fault, not a communication one. What existed was a
+clean **one-way pipe**: agents draft, David approves. There was no way for an agent to
+*ask* him anything and no way for him to direct an agent from where he actually works —
+so every open question ended up in a terminal he never reads. Triple & Co's model has
+the human genuinely in the loop; this had him only at the end of it.
+
+**What was built:**
+
+- `agents/state/questions.csv` — the queue an agent writes to when it is blocked, with
+  `why_it_matters` and the `blocking` draft id so David sees the cost of not answering.
+- **The command centre**, republished with the `db` capability, where he answers
+  questions, approves / kills / **sends back** drafts with a note, and gives any agent a
+  standing instruction. Everything he does persists to the artifact's own store.
+- `agents/DIALOGUE.md` — where each kind of message goes, how Chief reads his answers
+  back (`read_db` on `answers`, `decisions`, `directives`), and **what runs without
+  asking versus what never does.**
+- **Gate 4: never ask David a question in a terminal.** He is not there.
+- Chief gained a job zero: read what David said before doing anything else.
+
+**One rule genuinely changed.** "Never send anything" turned out to have a narrow
+exception he asked for himself: **email to David is not sending.** The morning brief
+goes to `david@cre8orglobal.com` with no approval; every other address on earth stays
+draft-only. That distinction is now in GATES gate 1 and in DIALOGUE.md.
+
+The first brief went out and the four open questions are live on the board, in BizDave's
+`pending_actions`, and in that email.
+
+**A publishing constraint worth recording:** an artifact declaring `db` cannot be shared
+publicly, and the original watch board already was. Rather than silently un-share his
+link, the interactive version took its own private URL. Both are recorded in
+`04-artifacts/README.md`; they can be collapsed if he turns public sharing off.

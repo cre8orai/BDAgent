@@ -6,37 +6,49 @@ Business development for **Cre8or**, run by six agents that write as David.
 been sent — and nothing can be, without David approving it row by row.
 
 ```
-DAVID  ──►  CHIEF  ──►  Scout · Ghost · Opener · Chaser · Desk · Closer
-              ▲                            │
-              └──────── outbox.csv ◄───────┘   status=draft
-                             │
-                    David approves (review.sh)
-                             │
-              draft.sh ──► a Gmail DRAFT sitting in his Gmail
-                             │
-                    he presses Send. or he doesn't.
+                     ┌──────────── DAVID ────────────┐
+                     │                               │
+       answers, decisions, directives          the command centre
+                     │                          BizDave · his email
+                     ▼                               ▲
+                   CHIEF ────────────────────────────┘
+                     │                    questions, drafts, the brief
+                     ▼
+  Scout · Ghost · Opener · Chaser · Desk · Closer
+                     │
+              outbox.csv  ──►  he approves  ──►  a Gmail DRAFT
+                                                 he presses Send
+```
 
-              bizdave.py ──► BizDave says "drafts waiting" 
+**It is a conversation, not a pipeline.** Agents raise questions when they are blocked;
+he answers on the board; they act on the answer. He can also just tell any agent what to
+do. Nothing reaches a third party without him.
 ```
 
 ## Start here
 
 | | |
 |---|---|
-| [`CONNECT.md`](CONNECT.md) | **How to turn it on.** Email is already connected; LinkedIn needs one setting |
+| [Command centre](https://claude.ai/code/artifact/a996dabf-6c6d-46ee-82a5-99a5b0e62e23) | **Where David works.** Answer questions, decide on drafts, direct an agent |
+| [`agents/DIALOGUE.md`](agents/DIALOGUE.md) | How the two-way conversation works, and what runs without asking |
+| [`CONNECT.md`](CONNECT.md) | How to turn it on. Email is already connected |
 | [`agents/README.md`](agents/README.md) | The six agents, who each one is, how work moves |
 | [`agents/GATES.md`](agents/GATES.md) | What may never happen unattended, and why |
 | [`voice/STYLE.md`](voice/STYLE.md) | How David writes, with the evidence |
-| [`pipeline.html`](pipeline.html) | The command centre. Rebuilt after every run |
+| [`command-centre.html`](command-centre.html) | The source of that page. Rebuilt after every run |
 
 ## The three commands
 
+David works on the board, not here. These are for whoever is running the agents:
+
 ```bash
-bash agents/cycle.sh          # all six run. Drafts land in the outbox
-bash agents/review.sh         # read each draft — a to approve, k to kill
-bash agents/draft.sh          # approved rows become Gmail drafts. NOTHING IS SENT
-python3 agents/bizdave.py     # tell BizDave there are drafts waiting
+bash agents/cycle.sh          # all six run. Questions and drafts land in state/
+bash agents/draft.sh          # rows David approved become Gmail drafts. NOTHING IS SENT
+python3 agents/bizdave.py     # tell BizDave there is something waiting
 ```
+
+`bash agents/review.sh` is the terminal fallback for approving drafts. The board is the
+real surface — it also takes his answers and his instructions, which the terminal can't.
 
 ## The six
 
@@ -63,6 +75,13 @@ are listed for David to paste by hand.
 Enforced in three places: no script calls a send tool; the scheduled permission profile
 denies sending *and* drafting; the drafting profile allows `create_draft` and denies
 everything else. See [`agents/GATES.md`](agents/GATES.md).
+
+## It asks, and it listens
+
+When an agent is blocked it raises a question rather than guessing. The question reaches
+David on the board, in BizDave, and in his morning email; his answer comes back through
+the board's own store and Chief applies it before the next run. **No agent ever asks him
+something in a terminal** — he isn't there.
 
 ## It tells BizDave
 

@@ -43,6 +43,11 @@ Three reasons this is right, any one of which is sufficient:
    account restriction, and David's LinkedIn is a 21-year, 7,246-person asset — most of
    the warm paths in `state/people.csv` run through it.
 
+**The one exception, and it is narrow: email to David himself.** The morning brief goes
+to `david@cre8orglobal.com` and needs no approval — he asked for it. **Every other
+address in the world is draft-only.** Check the recipient before any message leaves; if
+it is not David, it is a draft.
+
 **If a future session is asked to "just send this one":** write the outbox row, run
 `draft.sh` so it is sitting in his Gmail, and tell him it is waiting. Do not reach for a
 Gmail send tool directly. Do not widen a settings profile. Do not add a send path back.
@@ -64,26 +69,36 @@ same account through different doors in the same week is the failure this shared
 exists to prevent. If the account is live with anyone — David, Tal, Assaf — the row is
 not written; a note goes to the daily brief instead.
 
-## Gate 4 — Never invent
+## Gate 4 — Ask David where he is, never in a terminal
+
+He does not read terminal sessions, and a question asked there is a question never
+answered. Anything needing his judgement becomes a row in `state/questions.csv`, which
+reaches him on the command centre, in BizDave, and in his morning email. He answers
+there; Chief reads it back. See [`DIALOGUE.md`](DIALOGUE.md).
+
+Ask only what he alone can answer. If it could be found in Gmail, the LinkedIn corpus,
+`connections.csv` or the repo, it is not a question — it is work not yet done.
+
+## Gate 5 — Never invent
 
 No person, company, title, mutual connection, funding round, prior conversation or
 figure that did not come from a tool result. This matters more here than in research
 because the invention is about to be **said to the person it is about**. `[UNKNOWN]`
 in a brief is fine. `[UNKNOWN]` in an outbound draft means the draft is not ready.
 
-## Gate 5 — Prices are not an agent's to set
+## Gate 6 — Prices are not an agent's to set
 
 The floor is in `docs/company/cre8or-primer.md` and the RetailGTM price book:
 $4.24 list, **$3.60 at the 15% ceiling — nothing below it, ever**. An agent may quote
 published prices. It may not discount, invent a volume break, or imply flexibility.
 Anything below the floor goes to David as a question, not to the prospect as an offer.
 
-## Gate 6 — Publishing is David's
+## Gate 7 — Publishing is David's
 
 Agents rebuild `pipeline.html` and the artifacts on every run. **An agent may not
 publish them.** Publishing puts content in front of people outside the project.
 
-## Gate 7 — The corpus stays home
+## Gate 8 — The corpus stays home
 
 `voice/corpus/` and `voice/raw/` are David's private correspondence, and they are
 gitignored. Only `voice/STYLE.md` — the derived guide, containing quotes he chose to

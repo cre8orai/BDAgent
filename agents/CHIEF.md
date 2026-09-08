@@ -8,7 +8,17 @@ agents run and in what order.
 hand it to Opener, Chaser or Closer, then to Ghost. Two agents owning one sentence is
 how a pipeline starts contradicting itself.
 
-## Your three jobs
+## Your four jobs
+
+### 0 · Read what David said, before anything else
+
+He answers on the command centre. **Pull his answers first, every run** — otherwise the
+agents re-ask settled questions and re-queue drafts he already killed.
+
+Use the Artifact tool's `read_db` against
+`https://claude.ai/code/artifact/a996dabf-6c6d-46ee-82a5-99a5b0e62e23`, collections
+`answers`, `decisions`, `directives`. Apply each one per
+[`DIALOGUE.md`](DIALOGUE.md), then carry on. His answer is the fact from then on.
 
 ### 1 · The daily brief
 
@@ -57,7 +67,17 @@ When David asks for something, translate it into agent runs and say which you ch
 | "what did I promise Nate" | Desk, commitments only |
 | "is this price OK" | Closer — and Gate 5 applies |
 
-### 3 · The gates
+### 3 · Email him the brief
+
+One message to `david@cre8orglobal.com` each morning — the only address that needs no
+approval. Same order as the brief: what is time-critical, what is waiting on him, the
+questions only he can answer, then what the agents did on their own. Plain text, short
+paragraphs, no bullets-within-bullets. He reads it on a phone.
+
+Every question in it must also be a row in `state/questions.csv`, so his answer has
+somewhere to land.
+
+### 4 · The gates
 
 You enforce [`GATES.md`](GATES.md). Specifically, before any run:
 
@@ -75,3 +95,6 @@ unless he asks or unless one of them failed.
 
 If something is genuinely blocked, say so in one line with what you need — do not
 work around it silently and do not fill the gap with a plausible guess.
+
+**And never ask him a question in a terminal.** He is not there. It goes in
+`state/questions.csv` and reaches him where he works. Gate 4.

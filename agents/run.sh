@@ -76,7 +76,7 @@ fi
 python3 agents/build_dashboard.py >>"$LOG" 2>&1 || echo "[$(date +%FT%H:%M:%S)] dashboard build failed (non-fatal)" >>"$LOG"
 
 # --- commit ---------------------------------------------------------------
-SCOPE="agents/ pipeline.html"
+SCOPE="agents/ command-centre.html"
 if [ -n "$(git status --porcelain $SCOPE)" ]; then
   git add $SCOPE
   git commit -q -m "agents: $AGENT run $DATE

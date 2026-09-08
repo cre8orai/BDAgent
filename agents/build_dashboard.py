@@ -4,11 +4,11 @@
 Runs after every agent run so the published command centre can never drift from
 the data behind it. An agent may rebuild this file; an agent may not publish it.
 """
-import csv, os, datetime, html
+import csv, os, datetime, html, json
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATE = os.path.join(ROOT, "agents", "state")
-OUT = os.path.join(ROOT, "pipeline.html")
+OUT = os.path.join(ROOT, "command-centre.html")
 
 
 def read(name):
@@ -36,6 +36,8 @@ outbox = read("outbox.csv")
 cadence = read("cadence.csv")
 commits = read("commitments.csv")
 signals = read("signals.csv")
+questions = read("questions.csv")
+open_questions = [q for q in questions if not q["answer"]]
 
 drafts = [r for r in outbox if r["status"] == "draft"]
 approved = [r for r in outbox if r["status"] == "approved"]
@@ -44,7 +46,7 @@ due = [r for r in cadence if r["status"] == "due"]
 
 # The roster. count is what that agent is currently responsible for.
 ROSTER = [
-    ("Chief", "at his desk on Monday", "routes, briefs, holds the gate", len(threads), "threads"),
+    ("Chief", "at his desk on Monday", "routes, briefs, asks you things", len(threads), "threads"),
     ("Scout", "the prospector", "who is worth a call, and the way in", len(people), "people"),
     ("Ghost", "the writer", "every outbound passes through it", len(outbox), "written"),
     ("Opener", "at the handshake", "first touch, LinkedIn and email",
@@ -152,15 +154,34 @@ voice_html = "".join(
 
 # Only figures that imply an action get a tile.
 TILES = [
-    (len(drafts), "waiting on you", "drafts to approve or kill", len(drafts) > 0),
+    (len(open_questions), "questions for you", "agents are blocked on these",
+     len(open_questions) > 0),
+    (len(drafts), "drafts to decide", "approve, kill, or send back", len(drafts) > 0),
     (len(overdue), "you owe, overdue", "promises past the date you gave", len(overdue) > 0),
     (len(due), "follow-ups due", "threads past their cadence", len(due) > 0),
-    (len(approved), "approved", "ready to become Gmail drafts", False),
 ]
 tiles_html = "".join(
     f'<div class="tile{" live" if live else ""}"><span class="tile-v">{v}</span>'
     f'<span class="tile-l">{esc(l)}</span><span class="tile-s">{esc(s)}</span></div>'
     for v, l, s, live in TILES)
+
+PAYLOAD = json.dumps({
+    "generated": datetime.datetime.now().isoformat(timespec="minutes"),
+    "questions": [{
+        "id": q["id"], "agent": q["agent"], "about": q["about"],
+        "question": q["question"], "why": q["why_it_matters"],
+        "blocking": q["blocking"],
+    } for q in open_questions],
+    "drafts": [{
+        "id": r["id"], "agent": r["agent"], "person": r["person"],
+        "company": r["company"], "channel": r["channel"],
+        "subject": r["subject"], "body": r["body"].replace("\\n", "\n"),
+        "notes": r["notes"],
+        "blocked_by": next((q["id"] for q in open_questions
+                            if q["blocking"] == r["id"]), None),
+    } for r in drafts],
+    "agents": [a[0] for a in ROSTER],
+}, ensure_ascii=False)
 
 now = datetime.datetime.now().strftime("%d %B %Y · %H:%M")
 
@@ -301,6 +322,54 @@ td strong {{ font-weight:600; }}
 .flow b {{ color:var(--accent); font-weight:600; }}
 code {{ font-family:var(--mono); font-size:12.5px; background:var(--sunk);
        border-radius:2px; padding:1px 5px; }}
+/* ---- the dialogue surface ---- */
+.ask {{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
+       border-radius:0 3px 3px 0; padding:17px 20px; margin-bottom:11px; }}
+.ask.answered {{ border-left-color:var(--ok); opacity:.72; }}
+.ask-who {{ font-family:var(--mono); font-size:10.5px; text-transform:uppercase;
+           letter-spacing:.13em; color:var(--accent); }}
+.ask-q {{ font-family:var(--display); font-weight:600; font-size:16.5px; margin:6px 0 0;
+         letter-spacing:-.01em; text-wrap:balance; }}
+.ask-why {{ font-family:var(--serif); font-size:14px; color:var(--mute); margin:7px 0 0;
+           max-width:72ch; }}
+.ask-blocks {{ font-family:var(--mono); font-size:11px; color:var(--warn);
+              background:var(--warn-bg); display:inline-block; padding:2px 8px;
+              border-radius:2px; margin-top:9px; }}
+.reply {{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }}
+textarea, input[type=text], select {{
+  font-family:var(--display); font-size:14px; color:var(--ink); background:var(--ground);
+  border:1px solid var(--line); border-radius:3px; padding:9px 11px; width:100%;
+  resize:vertical; }}
+textarea:focus, input:focus, select:focus {{ outline:2px solid var(--accent); outline-offset:1px; }}
+button {{ font-family:var(--display); font-size:13px; font-weight:600; cursor:pointer;
+         border:1px solid var(--line); background:var(--panel); color:var(--ink);
+         border-radius:3px; padding:8px 15px; }}
+button:hover {{ border-color:var(--accent); }}
+button:focus-visible {{ outline:2px solid var(--accent); outline-offset:1px; }}
+button.primary {{ background:var(--accent); border-color:var(--accent); color:var(--panel); }}
+button.danger:hover {{ border-color:var(--bad); color:var(--bad); }}
+button[aria-pressed="true"] {{ background:var(--accent); border-color:var(--accent); color:var(--panel); }}
+.said-back {{ font-family:var(--serif); font-size:14.5px; margin:10px 0 0; padding:9px 13px;
+             background:var(--ok-bg); color:var(--ok); border-radius:3px; }}
+.card {{ background:var(--panel); border:1px solid var(--line); border-radius:3px;
+        padding:17px 20px; margin-bottom:11px; }}
+.card.decided {{ opacity:.66; }}
+.card-top {{ display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+            flex-wrap:wrap; }}
+.card-who {{ font-weight:600; font-size:15px; }}
+.card-meta {{ font-family:var(--mono); font-size:11px; color:var(--mute); }}
+.card-note {{ font-family:var(--mono); font-size:11.5px; color:var(--warn);
+             background:var(--warn-bg); padding:6px 10px; border-radius:2px; margin:9px 0 0; }}
+.card-body {{ font-family:var(--serif); font-size:15px; line-height:1.5; white-space:pre-wrap;
+             margin:11px 0 0; padding:12px 15px; background:var(--ground);
+             border-radius:3px; border:1px solid var(--line); }}
+.verdict {{ font-family:var(--mono); font-size:11px; font-weight:600; padding:3px 9px;
+           border-radius:2px; }}
+.verdict.approve {{ background:var(--ok-bg); color:var(--ok); }}
+.verdict.kill {{ background:var(--bad-bg); color:var(--bad); }}
+.verdict.edit {{ background:var(--warn-bg); color:var(--warn); }}
+.offline {{ font-family:var(--mono); font-size:12px; color:var(--warn);
+           background:var(--warn-bg); border-radius:3px; padding:11px 15px; margin:0 0 14px; }}
 footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
          color:var(--mute); font-size:12.5px; font-family:var(--mono); line-height:1.8; }}
 </style>
@@ -310,9 +379,9 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
 <header>
   <div>
     <h1>Cre8or BD Watch Board</h1>
-    <p class="sub-title">Six agents, one voice, and no way to send anything. They draft;
-    David presses Send. Everything below is read from <code>agents/state/</code> — no
-    figure on this page was typed by hand.</p>
+    <p class="sub-title">Six agents work under David. They ask him when they are stuck,
+    draft in his voice when they are not, and send nothing to anyone. Answer, decide and
+    direct them here — it is read back before the next run.</p>
   </div>
   <p class="built">built <b>{now}</b><br>cre8orai/BDAgent</p>
 </header>
@@ -331,10 +400,29 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
            "No open commitments — Desk found nothing you promised and haven't delivered.")}
   </section>
 
+  <section id="asks-section">
+    <h2>Your agents are asking you</h2>
+    <div id="offline" class="offline" hidden>Read-only right now — answers can't be
+    saved from this view. Everything below is still current.</div>
+    <div id="asks"></div>
+  </section>
+
   <section>
-    <h2>Waiting for your approval</h2>
-    {table(["Agent", "Person", "Channel", "Subject", "Opens with"], draft_rows,
-           "No drafts. Run <code>bash agents/cycle.sh</code> to generate some.")}
+    <h2>Drafts — approve, kill, or send back</h2>
+    <div id="drafts"></div>
+  </section>
+
+  <section>
+    <h2>Tell an agent what to do</h2>
+    <div class="card">
+      <div class="reply">
+        <select id="dir-agent" aria-label="Which agent" style="max-width:170px"></select>
+        <input type="text" id="dir-text" style="flex:1;min-width:240px"
+               placeholder="e.g. stop chasing Front Row entirely, or find me medspa franchisors in Texas">
+        <button class="primary" id="dir-send">Send it</button>
+      </div>
+      <div id="dir-log"></div>
+    </div>
   </section>
 
   <section>
@@ -370,20 +458,29 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
 </div>
 
 <section>
-  <h2>The rule</h2>
+  <h2>How this works</h2>
   <div class="gate">
-    <h3>Nothing here sends. There is no send path in the repo.</h3>
-    <p class="flow">Scout · Desk · Chaser · Closer
-      └─► <b>GHOST</b> (the voice)
-            └─► outbox.csv   <b>status = draft</b>
-                  └─► <b>DAVID</b> reads each one — approves or kills
-                        └─► draft.sh ──► a Gmail <b>DRAFT</b> in his Gmail
-                              └─► <b>he presses Send.</b> nothing else does
-                        └─► bizdave.py ──► BizDave: "drafts waiting"</p>
-    <p>Agents write rows and stop. Approved rows become real Gmail drafts that sit in
-    David's Gmail until he presses Send himself. <code>send.sh</code> was deleted from
-    the tree on 8 September — removed, not disabled — and no flag or variable brings it
-    back.</p>
+    <h3>They ask. You decide. Nothing reaches anyone without you.</h3>
+    <p class="flow">Scout · Desk · Chaser · Closer          blocked? ──► a <b>QUESTION</b>
+      └─► <b>GHOST</b> (the voice)                                    │
+            └─► a <b>DRAFT</b> ─────────────────────┐                 │
+                                                    ▼                 ▼
+                                        <b>YOU</b>, on this page · BizDave · your email
+                                                    │
+                    approve ─┬─ kill ─┬─ send back ─┴─ or just tell an agent what to do
+                             │        │
+                             ▼        ▼
+              a Gmail <b>DRAFT</b>    the agent rewrites it
+              <b>you</b> press Send</p>
+    <p><strong>This page is where the conversation happens.</strong> When an agent is
+    blocked it asks rather than guesses, and the question appears at the top with the
+    draft it is holding up. Answer it and the agent acts on the answer. Approve, kill or
+    send a draft back with a note, or skip all of that and just tell an agent what to
+    do — every one of those is read back before the next run.</p>
+    <p>Approved rows become real Gmail drafts sitting in David's Gmail until he presses
+    Send himself. <code>send.sh</code> was deleted from the tree on 8 September —
+    removed, not disabled — and no flag or variable brings it back. The one exception is
+    the morning brief, which goes to David and nobody else.</p>
     <p>Enforced in three places, so losing one opens no hole: no script calls a send
     tool; the scheduled permission profile denies sending <em>and</em> drafting, so a
     scheduled agent writes CSV and stops; the drafting profile allows only
@@ -400,9 +497,155 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
   github.com/cre8orai/BDAgent
 </footer>
 </div>
+
+<script id="bd-data" type="application/json">{PAYLOAD}</script>
+<script>
+(function () {{
+  const DATA = JSON.parse(document.getElementById("bd-data").textContent);
+  const asksEl = document.getElementById("asks");
+  const draftsEl = document.getElementById("drafts");
+  const dirAgent = document.getElementById("dir-agent");
+  const dirText = document.getElementById("dir-text");
+  const dirSend = document.getElementById("dir-send");
+  const dirLog = document.getElementById("dir-log");
+  const offline = document.getElementById("offline");
+
+  let db = null;                       // set if this view can persist
+  const answers = new Map();           // questionId -> {{text, at}}
+  const verdicts = new Map();          // draftId    -> {{verdict, note, at}}
+  const directives = [];
+
+  const esc = (t) => {{ const d = document.createElement("div"); d.textContent = t ?? ""; return d.innerHTML; }};
+  const when = (iso) => {{ try {{ return new Date(iso).toLocaleString(undefined,
+      {{month:"short", day:"numeric", hour:"2-digit", minute:"2-digit"}}); }} catch {{ return ""; }} }};
+
+  DATA.agents.forEach((a) => {{
+    const o = document.createElement("option"); o.value = a; o.textContent = a; dirAgent.append(o);
+  }});
+
+  // ---------- render ----------
+  function renderAsks() {{
+    if (!DATA.questions.length) {{
+      asksEl.innerHTML = '<p class="empty">Nothing blocked. Your agents have everything they need.</p>';
+      return;
+    }}
+    asksEl.innerHTML = DATA.questions.map((q) => {{
+      const a = answers.get(q.id);
+      return `<div class="ask ${{a ? "answered" : ""}}">
+        <span class="ask-who">${{esc(q.agent)}} &middot; ${{esc(q.about)}}</span>
+        <p class="ask-q">${{esc(q.question)}}</p>
+        <p class="ask-why">${{esc(q.why)}}</p>
+        ${{q.blocking ? `<span class="ask-blocks">holding draft ${{esc(q.blocking)}}</span>` : ""}}
+        ${{a
+          ? `<p class="said-back">You said: ${{esc(a.text)}}<br><span class="card-meta">${{when(a.at)}}</span></p>`
+          : `<div class="reply">
+               <textarea rows="2" data-q="${{esc(q.id)}}" placeholder="Answer in your own words — the agent reads this and acts on it"></textarea>
+               <button class="primary" data-answer="${{esc(q.id)}}">Answer</button>
+             </div>`}}
+      </div>`;
+    }}).join("");
+  }}
+
+  function renderDrafts() {{
+    if (!DATA.drafts.length) {{
+      draftsEl.innerHTML = '<p class="empty">No drafts waiting.</p>';
+      return;
+    }}
+    draftsEl.innerHTML = DATA.drafts.map((d) => {{
+      const v = verdicts.get(d.id);
+      const blocked = d.blocked_by && !answers.has(d.blocked_by);
+      return `<div class="card ${{v ? "decided" : ""}}">
+        <div class="card-top">
+          <span class="card-who">${{esc(d.person)}} <span class="card-meta">${{esc(d.company)}}</span></span>
+          <span class="card-meta">${{esc(d.agent)}} &middot; ${{esc(d.channel)}} &middot; ${{esc(d.id)}}</span>
+        </div>
+        ${{d.notes ? `<p class="card-note">${{esc(d.notes)}}</p>` : ""}}
+        ${{blocked ? `<p class="card-note">Waiting on your answer above before this is safe to use.</p>` : ""}}
+        <div class="card-body">${{esc(d.body)}}</div>
+        ${{v
+          ? `<p class="said-back"><span class="verdict ${{v.verdict}}">${{esc(v.verdict)}}</span>
+               ${{v.note ? " &mdash; " + esc(v.note) : ""}}
+               <br><span class="card-meta">${{when(v.at)}}</span></p>`
+          : `<div class="reply">
+               <button class="primary" data-verdict="approve" data-id="${{esc(d.id)}}">Approve</button>
+               <button data-verdict="edit" data-id="${{esc(d.id)}}">Send back</button>
+               <button class="danger" data-verdict="kill" data-id="${{esc(d.id)}}">Kill</button>
+               <input type="text" data-note="${{esc(d.id)}}" style="flex:1;min-width:200px"
+                      placeholder="Optional — what to change, or why">
+             </div>`}}
+      </div>`;
+    }}).join("");
+  }}
+
+  function renderDirectives() {{
+    dirLog.innerHTML = directives.length
+      ? directives.map((d) => `<p class="said-back"><strong>${{esc(d.agent)}}</strong> &mdash;
+          ${{esc(d.text)}}<br><span class="card-meta">${{when(d.at)}}</span></p>`).join("")
+      : "";
+  }}
+
+  renderAsks(); renderDrafts();
+
+  // ---------- persistence ----------
+  async function save(path, body) {{
+    if (!db) return false;
+    try {{ await db.doc(path).set(body); return true; }}
+    catch (e) {{ console.warn("save failed", path, e && e.code); return false; }}
+  }}
+
+  asksEl.addEventListener("click", async (ev) => {{
+    const btn = ev.target.closest("[data-answer]");
+    if (!btn) return;
+    const id = btn.dataset.answer;
+    const box = asksEl.querySelector(`textarea[data-q="${{id}}"]`);
+    const text = (box && box.value || "").trim();
+    if (!text) {{ box && box.focus(); return; }}
+    const rec = {{ questionId: id, text, at: new Date().toISOString() }};
+    answers.set(id, rec); renderAsks(); renderDrafts();
+    await save("answers/" + id, rec);
+  }});
+
+  draftsEl.addEventListener("click", async (ev) => {{
+    const btn = ev.target.closest("[data-verdict]");
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const noteEl = draftsEl.querySelector(`input[data-note="${{id}}"]`);
+    const rec = {{ draftId: id, verdict: btn.dataset.verdict,
+                  note: (noteEl && noteEl.value || "").trim(),
+                  at: new Date().toISOString() }};
+    verdicts.set(id, rec); renderDrafts();
+    await save("decisions/" + id, rec);
+  }});
+
+  dirSend.addEventListener("click", async () => {{
+    const text = dirText.value.trim();
+    if (!text) {{ dirText.focus(); return; }}
+    const rec = {{ agent: dirAgent.value, text, at: new Date().toISOString(), status: "new" }};
+    directives.unshift(rec); dirText.value = ""; renderDirectives();
+    await save("directives/" + Date.now().toString(36), rec);
+  }});
+
+  // ---------- come alive if the store is there ----------
+  (async () => {{
+    db = (window.claude && claude.use) ? await claude.use("db") : null;
+    if (!db) {{ offline.hidden = false; return; }}
+    try {{
+      const [ans, dec, dir] = await Promise.all([
+        db.collection("answers").get(),
+        db.collection("decisions").get(),
+        db.collection("directives").orderBy("at", "desc").limit(20).get(),
+      ]);
+      ans.docs.forEach((d) => {{ const v = d.data(); if (v && v.questionId) answers.set(v.questionId, v); }});
+      dec.docs.forEach((d) => {{ const v = d.data(); if (v && v.draftId) verdicts.set(v.draftId, v); }});
+      dir.docs.forEach((d) => directives.push(d.data()));
+      renderAsks(); renderDrafts(); renderDirectives();
+    }} catch (e) {{ console.warn("load failed", e && e.code); }}
+  }})();
+}})();
+</script>
 """
 
 with open(OUT, "w") as f:
     f.write(HTML)
-print(f"pipeline.html rebuilt — {len(threads)} threads, {len(drafts)} drafts, "
+print(f"command-centre.html rebuilt — {len(threads)} threads, {len(drafts)} drafts, "
       f"{len(overdue)} overdue commitments, {len(people)} people")
