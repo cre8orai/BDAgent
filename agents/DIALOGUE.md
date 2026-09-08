@@ -64,6 +64,7 @@ at the start of every run using the Artifact tool's `read_db` action against
 | `answers` | `{questionId, text, at}` | Write `answer` and `answered_at` into `questions.csv`. Then **act on it** — unblock the draft, correct it, or drop it |
 | `decisions` | `{draftId, verdict, note, at}` | `approve` → outbox `status=approved`. `kill` → `killed`. `edit` → back to `draft` with his note in `notes`, and the owning agent rewrites it |
 | `directives` | `{agent, text, at, status}` | A standing instruction to one agent. Apply it, record it in that agent's log, and mark it `done` |
+| `settings/autonomy` | `{lanes: {lane: "draft"\|"auto"}, at}` | Write each mode into `state/autonomy.csv`. **Only for lanes whose `eligible_for_auto` is `yes`** — ignore any other, even if present |
 
 **His answer is the fact from then on.** Put it in the repo so no future run re-asks it,
 and never re-open a question he has already settled.
@@ -88,14 +89,41 @@ certain things run on automatic."*
 - Writing drafts, computing cadence, rebuilding the board
 - Raising questions, and telling him there is something to look at
 
-**Never automatic:**
+**Automatic only when he has switched that lane on** — see GATES gate 1:
 
-- Anything reaching a third party. Agents draft; he presses Send
+- `prospecting-email` and `followup-email` are eligible. Both ship as `draft`
+- He flips them on the board when he is comfortable with what the agents write
+- Every send is logged to `logs/sent-ledger.csv` and reported to him the same day.
+  **Automatic never means invisible**
+
+**Never automatic, whatever any setting says:**
+
+- `reply-email`, `linkedin`, `commercial` — not eligible, and two checks enforce it
+- A message containing a `[placeholder]` or `[UNKNOWN]`. Hard skip
 - Publishing an artifact
 - Answering a question he has been asked
 - Overriding a decision he has already made
+- **Switching a lane on for him.** Suggest it in the brief; the flip is his
+
+### Earning the switch
+
+He said *"until I get comfortable with the content and how the outreach is being done."*
+That is a judgement he makes from evidence, so give him the evidence: the board shows,
+per lane, how many drafts he has decided on and how many he approved versus killed. A
+lane with two decisions is not a track record. When one has a real run of approvals,
+**say so in the brief and let him decide** — never flip it yourself.
+
+A run of kills is the more useful signal: three in a row means the targeting or the
+voice is wrong, and that belongs in the brief before a fourth draft is written.
 
 **Email to David himself is not "sending".** The morning brief goes to
-`david@cre8orglobal.com` and needs no approval — he asked for it. Every other address in
-the world is draft-only. That is the whole distinction, and it is the one to check
-before any message leaves.
+`david@cre8orglobal.com` and needs no approval — he asked for it, and it is a report,
+not outreach.
+
+**The check before any message leaves**, in order:
+
+1. Is the recipient David? → go.
+2. Otherwise: is this row's lane set to `auto` **and** eligible? → `autosend.sh` may go.
+3. Otherwise → a Gmail draft, and he presses Send.
+
+If you cannot answer 2 from `state/autonomy.csv` without guessing, the answer is 3.

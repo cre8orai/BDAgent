@@ -176,3 +176,50 @@ The first brief went out and the four open questions are live on the board, in B
 publicly, and the original watch board already was. Rather than silently un-share his
 link, the interactive version took its own private URL. Both are recorded in
 `04-artifacts/README.md`; they can be collapsed if he turns public sharing off.
+
+---
+
+## Amended a third time — graduated autonomy, and it reverses the second amendment
+
+David: *"prospecting emails are ok to automate but put them at first in drafts and
+notify me until I get comfortable with the content and how the outreach is being done,
+and always give me the option to automate and send."*
+
+This directly reverses "never send anything". A send path exists again — but it is
+**per-lane and his to switch**, and every lane ships as `draft`. Gate 1 was rewritten
+rather than patched, and it now carries both instructions and the date, so no future
+session reads the absolute version back in.
+
+`state/autonomy.csv` — one row per lane, `mode` plus `eligible_for_auto`:
+
+| Lane | Eligible | Ships as |
+|---|---|---|
+| `prospecting-email` | yes — the lane he named | draft |
+| `followup-email` | yes | draft |
+| `reply-email` | **no** — a wrong reply damages an existing relationship | draft |
+| `linkedin` | **no** — no API, breaches the UA | draft |
+| `commercial` | **no** — Gate 6 | draft |
+| `brief-to-david` | already auto — a report, not outreach | auto |
+
+**Two independent checks** stop an ineligible lane going live: the board renders no
+switch for it, and `autosend_plan.py` refuses it even if the CSV is hand-edited. A
+mis-set flag must not be able to send a reply.
+
+**What auto still refuses:** any body containing an unfilled `[placeholder]` or
+`[UNKNOWN]` — a hard skip, because a bracket reaching a real person is the worst thing
+this system could produce; 12/day ceiling; email only; and every send appended to
+`logs/sent-ledger.csv` and reported the same day. *Automatic never means invisible.*
+
+`agents/autosend.sh` + `.claude/settings.auto.json` are the only place a send tool is
+permitted, and the script refuses every lane he has not switched on. `draft.sh` keeps
+handling draft lanes untouched.
+
+**The board now shows the evidence he needs to decide.** Each lane displays how many
+drafts he has decided on and how many he approved versus killed — because "until I get
+comfortable" is a judgement from a track record, and right now every lane's record is
+honestly empty. **An agent may never flip a switch for him**; it may only say in the
+brief that a lane looks ready.
+
+`[OPEN]` The lane he actually wants to automate has **no drafts in it yet** — all eight
+current drafts are replies, follow-ups or LinkedIn. Opener has to source and write real
+first-touch prospecting before there is anything for him to judge.

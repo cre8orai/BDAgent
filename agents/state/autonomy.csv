@@ -1,0 +1,7 @@
+lane,mode,eligible_for_auto,set_by,set_at,note
+prospecting-email,draft,yes,david,2026-09-08,First-touch cold email to someone new. David: OK to automate eventually — draft-only until he has seen enough of the content to be comfortable
+followup-email,draft,yes,default,2026-09-08,"Chaser touches 2-4 on a thread that has had no reply. Eligible, but earn prospecting's trust first"
+reply-email,draft,no,default,2026-09-08,Replies to a live human conversation. Not eligible — a wrong reply damages a relationship that already exists
+linkedin,draft,no,default,2026-09-08,No API and automated messaging breaches LinkedIn's UA. David pastes these by hand. Not eligible
+commercial,draft,no,default,2026-09-08,"Anything touching price, terms or a commitment. Not eligible — Gate 6"
+brief-to-david,auto,yes,david,2026-09-08,The morning brief to david@cre8orglobal.com. Already automatic — he asked for it. Not outreach

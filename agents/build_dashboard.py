@@ -37,6 +37,7 @@ cadence = read("cadence.csv")
 commits = read("commitments.csv")
 signals = read("signals.csv")
 questions = read("questions.csv")
+autonomy = read("autonomy.csv")
 open_questions = [q for q in questions if not q["answer"]]
 
 drafts = [r for r in outbox if r["status"] == "draft"]
@@ -165,6 +166,19 @@ tiles_html = "".join(
     f'<span class="tile-l">{esc(l)}</span><span class="tile-s">{esc(s)}</span></div>'
     for v, l, s, live in TILES)
 
+def track_record(lane):
+    """What has actually happened in this lane. Empty is an honest answer."""
+    seen = [r for r in outbox if r.get("lane") == lane]
+    done = [r for r in seen if r["status"] in ("approved", "killed", "sent", "drafted")]
+    ok = [r for r in done if r["status"] in ("approved", "sent", "drafted")]
+    return {
+        "decided": len(done),
+        "approved": len(ok),
+        "killed": len([r for r in done if r["status"] == "killed"]),
+        "waiting": len([r for r in seen if r["status"] == "draft"]),
+    }
+
+
 PAYLOAD = json.dumps({
     "generated": datetime.datetime.now().isoformat(timespec="minutes"),
     "questions": [{
@@ -181,6 +195,11 @@ PAYLOAD = json.dumps({
                             if q["blocking"] == r["id"]), None),
     } for r in drafts],
     "agents": [a[0] for a in ROSTER],
+    "lanes": [{
+        "lane": a["lane"], "mode": a["mode"],
+        "eligible": a["eligible_for_auto"] == "yes",
+        "note": a["note"], "record": track_record(a["lane"]),
+    } for a in autonomy if a["lane"] != "brief-to-david"],
 }, ensure_ascii=False)
 
 now = datetime.datetime.now().strftime("%d %B %Y · %H:%M")
@@ -368,6 +387,23 @@ button[aria-pressed="true"] {{ background:var(--accent); border-color:var(--acce
 .verdict.approve {{ background:var(--ok-bg); color:var(--ok); }}
 .verdict.kill {{ background:var(--bad-bg); color:var(--bad); }}
 .verdict.edit {{ background:var(--warn-bg); color:var(--warn); }}
+.lane {{ display:grid; grid-template-columns:1fr auto; gap:10px 16px; align-items:center;
+        background:var(--panel); border:1px solid var(--line); border-radius:3px;
+        padding:14px 18px; margin-bottom:9px; }}
+.lane.on {{ border-color:var(--accent); background:var(--accent-soft); }}
+.lane.locked {{ opacity:.6; }}
+.lane-name {{ font-family:var(--mono); font-size:12.5px; font-weight:600; letter-spacing:.02em; }}
+.lane-note {{ font-size:12.5px; color:var(--mute); margin:3px 0 0; max-width:62ch;
+             grid-column:1 / -1; }}
+.lane-rec {{ font-family:var(--mono); font-size:11.5px; color:var(--mute); margin:5px 0 0;
+            grid-column:1 / -1; }}
+.lane-rec b {{ color:var(--ink); }}
+.switch {{ display:inline-flex; border:1px solid var(--line); border-radius:99px; overflow:hidden; }}
+.switch button {{ border:0; border-radius:0; padding:6px 15px; font-size:12px;
+                 font-family:var(--mono); letter-spacing:.03em; }}
+.switch button[aria-pressed="true"] {{ background:var(--accent); color:var(--panel); }}
+.locked-tag {{ font-family:var(--mono); font-size:11px; color:var(--mute);
+              background:var(--sunk); padding:4px 11px; border-radius:99px; }}
 .offline {{ font-family:var(--mono); font-size:12px; color:var(--warn);
            background:var(--warn-bg); border-radius:3px; padding:11px 15px; margin:0 0 14px; }}
 footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
@@ -379,9 +415,10 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
 <header>
   <div>
     <h1>Cre8or BD Watch Board</h1>
-    <p class="sub-title">Six agents work under David. They ask him when they are stuck,
-    draft in his voice when they are not, and send nothing to anyone. Answer, decide and
-    direct them here — it is read back before the next run.</p>
+    <p class="sub-title">Six agents work under David. They ask him when they are stuck and
+    draft in his voice when they are not. He answers, decides, directs them — and sets
+    which lanes are allowed to run on their own. All of it is read back before the next
+    run.</p>
   </div>
   <p class="built">built <b>{now}</b><br>cre8orai/BDAgent</p>
 </header>
@@ -410,6 +447,15 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
   <section>
     <h2>Drafts — approve, kill, or send back</h2>
     <div id="drafts"></div>
+  </section>
+
+  <section>
+    <h2>What runs on its own</h2>
+    <p class="lane-note" style="margin:0 0 12px">Everything starts as a draft. Switch a
+    lane to <strong>auto</strong> when you have seen enough of what it writes — and
+    switch it back the moment you don't like something. Only lanes marked eligible can
+    be switched at all.</p>
+    <div id="lanes"></div>
   </section>
 
   <section>
@@ -460,7 +506,7 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
 <section>
   <h2>How this works</h2>
   <div class="gate">
-    <h3>They ask. You decide. Nothing reaches anyone without you.</h3>
+    <h3>They ask. You decide. You choose what runs on its own.</h3>
     <p class="flow">Scout · Desk · Chaser · Closer          blocked? ──► a <b>QUESTION</b>
       └─► <b>GHOST</b> (the voice)                                    │
             └─► a <b>DRAFT</b> ─────────────────────┐                 │
@@ -477,10 +523,14 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
     draft it is holding up. Answer it and the agent acts on the answer. Approve, kill or
     send a draft back with a note, or skip all of that and just tell an agent what to
     do — every one of those is read back before the next run.</p>
-    <p>Approved rows become real Gmail drafts sitting in David's Gmail until he presses
-    Send himself. <code>send.sh</code> was deleted from the tree on 8 September —
-    removed, not disabled — and no flag or variable brings it back. The one exception is
-    the morning brief, which goes to David and nobody else.</p>
+    <p><strong>Every lane starts as a draft</strong> — the agent writes, you press Send
+    in Gmail. Switch a lane to <em>auto</em> above when you are comfortable with what it
+    produces, and switch it back the moment you aren't. Replies, LinkedIn and anything
+    commercial cannot be switched on at all, and two separate checks enforce that.</p>
+    <p>Even in an auto lane: a message containing an unfilled <code>[placeholder]</code>
+    is never sent, 12 a day is the ceiling, it is email only, and every send is written
+    to a ledger and reported to you the same day. <strong>Automatic never means
+    invisible.</strong> No agent may switch a lane on for you.</p>
     <p>Enforced in three places, so losing one opens no hole: no script calls a send
     tool; the scheduled permission profile denies sending <em>and</em> drafting, so a
     scheduled agent writes CSV and stops; the drafting profile allows only
@@ -508,12 +558,14 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
   const dirText = document.getElementById("dir-text");
   const dirSend = document.getElementById("dir-send");
   const dirLog = document.getElementById("dir-log");
+  const lanesEl = document.getElementById("lanes");
   const offline = document.getElementById("offline");
 
   let db = null;                       // set if this view can persist
   const answers = new Map();           // questionId -> {{text, at}}
   const verdicts = new Map();          // draftId    -> {{verdict, note, at}}
   const directives = [];
+  const modes = new Map(DATA.lanes.map((l) => [l.lane, l.mode]));
 
   const esc = (t) => {{ const d = document.createElement("div"); d.textContent = t ?? ""; return d.innerHTML; }};
   const when = (iso) => {{ try {{ return new Date(iso).toLocaleString(undefined,
@@ -577,6 +629,29 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
     }}).join("");
   }}
 
+  function renderLanes() {{
+    lanesEl.innerHTML = DATA.lanes.map((l) => {{
+      const mode = modes.get(l.lane);
+      const on = mode === "auto";
+      const r = l.record;
+      const rec = r.decided
+        ? `you have decided on <b>${{r.decided}}</b> in this lane &mdash;
+           <b>${{r.approved}}</b> approved, <b>${{r.killed}}</b> killed`
+        : `nothing decided in this lane yet &mdash; no track record to judge it on`;
+      return `<div class="lane ${{on ? "on" : ""}} ${{l.eligible ? "" : "locked"}}">
+        <span class="lane-name">${{esc(l.lane)}}</span>
+        ${{l.eligible
+          ? `<span class="switch">
+               <button data-lane="${{esc(l.lane)}}" data-mode="draft" aria-pressed="${{!on}}">draft</button>
+               <button data-lane="${{esc(l.lane)}}" data-mode="auto" aria-pressed="${{on}}">auto</button>
+             </span>`
+          : `<span class="locked-tag">always a draft</span>`}}
+        <p class="lane-note">${{esc(l.note)}}</p>
+        <p class="lane-rec">${{rec}}${{r.waiting ? ` &middot; ${{r.waiting}} waiting on you now` : ""}}</p>
+      </div>`;
+    }}).join("");
+  }}
+
   function renderDirectives() {{
     dirLog.innerHTML = directives.length
       ? directives.map((d) => `<p class="said-back"><strong>${{esc(d.agent)}}</strong> &mdash;
@@ -584,7 +659,7 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
       : "";
   }}
 
-  renderAsks(); renderDrafts();
+  renderAsks(); renderDrafts(); renderLanes();
 
   // ---------- persistence ----------
   async function save(path, body) {{
@@ -617,6 +692,18 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
     await save("decisions/" + id, rec);
   }});
 
+  lanesEl.addEventListener("click", async (ev) => {{
+    const btn = ev.target.closest("[data-lane]");
+    if (!btn) return;
+    const lane = btn.dataset.lane, mode = btn.dataset.mode;
+    if (modes.get(lane) === mode) return;
+    modes.set(lane, mode); renderLanes();
+    await save("settings/autonomy", {{
+      lanes: Object.fromEntries(modes),
+      at: new Date().toISOString(),
+    }});
+  }});
+
   dirSend.addEventListener("click", async () => {{
     const text = dirText.value.trim();
     if (!text) {{ dirText.focus(); return; }}
@@ -638,7 +725,7 @@ footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
       ans.docs.forEach((d) => {{ const v = d.data(); if (v && v.questionId) answers.set(v.questionId, v); }});
       dec.docs.forEach((d) => {{ const v = d.data(); if (v && v.draftId) verdicts.set(v.draftId, v); }});
       dir.docs.forEach((d) => directives.push(d.data()));
-      renderAsks(); renderDrafts(); renderDirectives();
+      renderAsks(); renderDrafts(); renderLanes(); renderDirectives();
     }} catch (e) {{ console.warn("load failed", e && e.code); }}
   }})();
 }})();

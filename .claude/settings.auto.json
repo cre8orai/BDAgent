@@ -1,0 +1,27 @@
+{
+  "_comment": "The AUTOSEND profile, used only by agents/autosend.sh. It can send email, and it exists only because David asked for the option. The script itself refuses to act on any lane he has not switched to auto in agents/state/autonomy.csv — the permission here is necessary but never sufficient. Browser and LinkedIn tools stay denied outright.",
+  "permissions": {
+    "allow": [
+      "Read", "Edit", "Write", "Glob", "Grep",
+      "Bash(python3 agents/*.py:*)",
+      "Bash(git add:*)", "Bash(git commit:*)", "Bash(git push:*)",
+      "mcp__claude_ai_Gmail__search_threads",
+      "mcp__claude_ai_Gmail__get_thread",
+      "mcp__claude_ai_Gmail__send_message",
+      "mcp__claude_ai_Gmail__create_draft"
+    ],
+    "deny": [
+      "mcp__claude_ai_Gmail__trash_message",
+      "mcp__claude_ai_Gmail__trash_thread",
+      "mcp__claude_ai_Gmail__forward",
+      "mcp__claude-in-chrome__computer",
+      "mcp__claude-in-chrome__form_input",
+      "mcp__claude-in-chrome__navigate",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_navigate",
+      "mcp__claude_ai_SuperClaud__send_communication",
+      "Bash(rm:*)"
+    ]
+  }
+}

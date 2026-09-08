@@ -43,7 +43,8 @@ David works on the board, not here. These are for whoever is running the agents:
 
 ```bash
 bash agents/cycle.sh          # all six run. Questions and drafts land in state/
-bash agents/draft.sh          # rows David approved become Gmail drafts. NOTHING IS SENT
+bash agents/draft.sh          # approved rows in DRAFT lanes -> Gmail drafts
+bash agents/autosend.sh       # approved rows in AUTO lanes only. Does nothing if none
 python3 agents/bizdave.py     # tell BizDave there is something waiting
 ```
 
@@ -63,18 +64,22 @@ real surface — it also takes his answers and his instructions, which the termi
 
 **Chief** sits above them and is who David talks to.
 
-## The one rule
+## The one rule: the mode is David's, and the default is draft
 
-**Nothing here sends. There is no send path in the repo at all.**
+Every lane ships as **draft** — agents write, he decides. He can switch a lane to
+**auto** on the board when he is comfortable with what it produces, and switch it back
+in one click.
 
-Agents write rows. Approved rows become **Gmail drafts** that sit in David's Gmail until
-he presses Send himself. LinkedIn is read-only to every agent — the archive and the
-connection graph are read, nothing is ever typed into linkedin.com, and LinkedIn drafts
-are listed for David to paste by hand.
+| Lane | Can be switched on? |
+|---|---|
+| `prospecting-email` · `followup-email` | **yes** — currently draft |
+| `reply-email` · `linkedin` · `commercial` | **no**, and two checks enforce it |
 
-Enforced in three places: no script calls a send tool; the scheduled permission profile
-denies sending *and* drafting; the drafting profile allows `create_draft` and denies
-everything else. See [`agents/GATES.md`](agents/GATES.md).
+Even in an auto lane: never a message containing a `[placeholder]`, 12 a day maximum,
+email only, and every send written to `agents/logs/sent-ledger.csv` and reported the
+same day. **Automatic never means invisible.**
+
+An agent may never switch a lane on for him. See [`agents/GATES.md`](agents/GATES.md).
 
 ## It asks, and it listens
 

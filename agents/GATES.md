@@ -3,54 +3,68 @@
 Read this before writing or changing any runner. These are not preferences, and
 Gate 1 is not negotiable by any future session.
 
-## Gate 1 — Nothing sends. Ever. There is no send path in this repo
+## Gate 1 — The mode is David's to set, and the default is draft
 
-**David's instruction, 2026-09-08: _"never send anything just create drafts."_**
+**This gate changed on 2026-09-08 and the history matters.** It first said "nothing
+sends, ever", after his instruction *"never send anything just create drafts."* He then
+said:
 
-This is not a guard around a capability — the capability was **deleted**. There used to
-be an `agents/send.sh`; it is gone from the tree, not disabled. Nothing that replaced it
-can transmit, and no flag, argument or environment variable turns transmission on.
+> *"prospecting emails are ok to automate but put them at first in drafts and notify me
+> until I get comfortable with the content and how the outreach is being done, and
+> always give me the option to automate and send."*
 
-What exists instead:
+So a send path exists again — **but only for a lane he has personally switched on**, and
+he can switch it off in one click. Do not read the old absolute rule back into this file.
 
-| | |
-|---|---|
-| `agents/review.sh` | David reads each draft and approves or kills it |
-| `agents/draft.sh` | turns approved rows into **Gmail drafts**. They sit in his Gmail. He presses Send, or he doesn't |
-| `agents/bizdave.py` | tells BizDave there are drafts waiting |
+### How it works
 
-**LinkedIn is never automated at all now.** LinkedIn has no draft API, so LinkedIn rows
-stay in `outbox.csv` and are listed for David to paste by hand. No agent opens a browser
-on linkedin.com. The rate limits that used to matter are moot: nothing types into
-LinkedIn.
+`state/autonomy.csv` holds one row per lane with a `mode` of `draft` or `auto`.
+**Every lane ships as `draft`.** David changes a mode on the command centre; Chief reads
+it back and writes it into the CSV.
 
-Enforced in three places, so removing any one of them does not open a hole:
+| Lane | Eligible for auto? | Why |
+|---|---|---|
+| `prospecting-email` | **yes** | First touch to someone new. The lane he named |
+| `followup-email` | **yes** | Chaser touches 2–4 on a silent thread. Earn prospecting's trust first |
+| `reply-email` | **no** | A wrong reply damages a relationship that already exists |
+| `linkedin` | **no** | No API, and automated messaging breaches LinkedIn's UA. He pastes these |
+| `commercial` | **no** | Price, terms, commitments. Gate 6 |
+| `brief-to-david` | auto already | Email to David is not outreach. He asked for it |
 
-1. **The tree.** No script in this repo calls a send tool.
-2. **`.claude/settings.json`** — the scheduled profile. Denies the Gmail send, reply and
-   forward tools, every browser click tool, and `create_draft` as well. A scheduled agent
-   writes CSV rows and nothing else.
-3. **`.claude/settings.draft.json`** — the drafting profile, used only by `draft.sh`.
-   Allows `create_draft` and denies everything that transmits.
+**A lane marked `eligible_for_auto=no` cannot be switched on at all** — the board offers
+no control, and `autosend_plan.py` refuses it even if the CSV is edited by hand. Two
+independent checks, because a mis-set flag should not be able to send a reply.
 
-Three reasons this is right, any one of which is sufficient:
+### The three paths
 
-1. **It is his name on it.** A person he has never met receiving a promise he never read
-   is the failure that matters, and no amount of draft quality prevents it.
-2. **Domain reputation.** Auto-sent cold email burns `cre8orglobal.com` faster than any
-   pipeline rebuilds it, and degrades every real conversation in the inbox with it.
-3. **LinkedIn's User Agreement §8.2 prohibits automated messaging.** Enforcement is
-   account restriction, and David's LinkedIn is a 21-year, 7,246-person asset — most of
-   the warm paths in `state/people.csv` run through it.
+| Script | Acts on | Result |
+|---|---|---|
+| `review.sh` | drafts | David approves, kills, or sends back |
+| `draft.sh` | approved rows in **draft** lanes | a Gmail draft. He presses Send |
+| `autosend.sh` | approved rows in **auto** lanes | sent, logged to `logs/sent-ledger.csv` |
 
-**The one exception, and it is narrow: email to David himself.** The morning brief goes
-to `david@cre8orglobal.com` and needs no approval — he asked for it. **Every other
-address in the world is draft-only.** Check the recipient before any message leaves; if
-it is not David, it is a draft.
+`run.sh` still cannot do any of it: the scheduled profile denies sending *and*
+`create_draft`. Scheduled agents write CSV rows, nothing more.
 
-**If a future session is asked to "just send this one":** write the outbox row, run
-`draft.sh` so it is sitting in his Gmail, and tell him it is waiting. Do not reach for a
-Gmail send tool directly. Do not widen a settings profile. Do not add a send path back.
+### What auto mode still refuses
+
+Even in a lane he has switched on:
+
+- **A message containing `[brackets]` or `[UNKNOWN]` is never sent.** A placeholder
+  reaching a real person is the worst outcome this system can produce, and it is a hard
+  skip, not a warning.
+- **12 a day, ceiling**, regardless of queue depth. Randomised gaps.
+- **Email only.** No browser, no LinkedIn, ever.
+- **Every send is written to `logs/sent-ledger.csv`** and reported to him. Automatic
+  never means invisible — he sees what went out in his name the same day.
+
+### The rule for a future session
+
+**Never switch a lane to `auto` on David's behalf, and never widen `eligible_for_auto`.**
+Both are his decisions, made on the board. If outreach is going well and a lane looks
+ready, *say so in the brief* and let him flip it. If something goes wrong in an auto
+lane, switch it back to `draft` immediately and tell him why — that direction needs no
+permission.
 
 ## Gate 2 — LinkedIn is read-only to every agent
 
