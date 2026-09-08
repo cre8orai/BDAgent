@@ -144,16 +144,16 @@ footer { margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
 <header>
   <div>
     <h1>Cre8or BD Watch Board</h1>
-    <p class="sub-title">Six agents, one voice, and a gate nothing gets past without
-    David. Everything below is read from <code>agents/state/</code> — no figure on this
-    page was typed by hand.</p>
+    <p class="sub-title">Six agents, one voice, and no way to send anything. They draft;
+    David presses Send. Everything below is read from <code>agents/state/</code> — no
+    figure on this page was typed by hand.</p>
   </div>
   <p class="built">built <b>08 September 2026 · 20:02</b><br>cre8orai/BDAgent</p>
 </header>
 
 <section>
   <h2>Needs a decision</h2>
-  <div class="tiles"><div class="tile live"><span class="tile-v">8</span><span class="tile-l">waiting on you</span><span class="tile-s">drafts to approve or kill</span></div><div class="tile live"><span class="tile-v">4</span><span class="tile-l">you owe, overdue</span><span class="tile-s">promises past the date you gave</span></div><div class="tile live"><span class="tile-v">1</span><span class="tile-l">follow-ups due</span><span class="tile-s">threads past their cadence</span></div><div class="tile"><span class="tile-v">0</span><span class="tile-l">cleared to go</span><span class="tile-s">approved, not yet out</span></div></div>
+  <div class="tiles"><div class="tile live"><span class="tile-v">8</span><span class="tile-l">waiting on you</span><span class="tile-s">drafts to approve or kill</span></div><div class="tile live"><span class="tile-v">4</span><span class="tile-l">you owe, overdue</span><span class="tile-s">promises past the date you gave</span></div><div class="tile live"><span class="tile-v">1</span><span class="tile-l">follow-ups due</span><span class="tile-s">threads past their cadence</span></div><div class="tile"><span class="tile-v">0</span><span class="tile-l">approved</span><span class="tile-s">ready to become Gmail drafts</span></div></div>
 </section>
 
 <div class="cols">
@@ -200,23 +200,27 @@ footer { margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
 </div>
 
 <section>
-  <h2>The gate</h2>
+  <h2>The rule</h2>
   <div class="gate">
-    <h3>No agent here has a way to send anything.</h3>
+    <h3>Nothing here sends. There is no send path in the repo.</h3>
     <p class="flow">Scout · Desk · Chaser · Closer
       └─► <b>GHOST</b> (the voice)
-            └─► outbox.csv   <b>status = draft</b>   ◄── and it stops here
-                  └─► <b>DAVID</b> reads each one, approves or kills
-                        └─► send.sh   ── Gmail / LinkedIn</p>
-    <p>Agents write rows and stop. <code>agents/send.sh</code> is the only script that
-    reaches anyone, it exits immediately without an interactive terminal, and it acts on
-    nothing but rows marked <code>approved</code>. Two permission profiles enforce that
-    in code rather than in a prompt — the scheduled profile denies the mail and browser
-    tools outright.</p>
-    <p>LinkedIn work is capped at 8 per session, 40–90 seconds apart, once a day, and
-    stops the whole run on any challenge screen rather than retrying. Three reasons, each
-    sufficient on its own: domain reputation, LinkedIn's User Agreement, and the fact
-    that it is David's name on every one of them.</p>
+            └─► outbox.csv   <b>status = draft</b>
+                  └─► <b>DAVID</b> reads each one — approves or kills
+                        └─► draft.sh ──► a Gmail <b>DRAFT</b> in his Gmail
+                              └─► <b>he presses Send.</b> nothing else does
+                        └─► bizdave.py ──► BizDave: "drafts waiting"</p>
+    <p>Agents write rows and stop. Approved rows become real Gmail drafts that sit in
+    David's Gmail until he presses Send himself. <code>send.sh</code> was deleted from
+    the tree on 8 September — removed, not disabled — and no flag or variable brings it
+    back.</p>
+    <p>Enforced in three places, so losing one opens no hole: no script calls a send
+    tool; the scheduled permission profile denies sending <em>and</em> drafting, so a
+    scheduled agent writes CSV and stops; the drafting profile allows only
+    <code>create_draft</code>.</p>
+    <p><strong>LinkedIn is read-only to every agent.</strong> The 2,558-message archive
+    and the 7,246-person connection graph are read. Nothing opens linkedin.com, clicks,
+    or types — LinkedIn drafts are listed for David to paste by hand.</p>
   </div>
 </section>
 
