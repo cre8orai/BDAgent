@@ -1,106 +1,228 @@
-<title>Cre8or BD Command Centre</title>
+<title>Cre8or BD Watch Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 :root {
-  --bg:#faf9f7; --panel:#fff; --ink:#16130f; --mute:#6b6259; --line:#e6e1da;
-  --accent:#b4531f; --ok:#2f6b4f; --warn:#a8761c; --bad:#a33232;
-  --okbg:#e8f2ec; --warnbg:#faf0dc; --badbg:#f8e8e6;
+  --ground:#f1f3f1; --panel:#fdfdfc; --sunk:#e8ebe8;
+  --ink:#14191a; --mute:#5d6a68; --line:#d8ddda;
+  --accent:#1c5b4c; --accent-soft:#e2ede9;
+  --ok:#2c6a4d; --ok-bg:#e4efe8;
+  --warn:#8a6210; --warn-bg:#f6ecd8;
+  --bad:#93312c; --bad-bg:#f7e5e3;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:#131110; --panel:#1c1917; --ink:#f0ebe4; --mute:#a09689; --line:#2e2925;
-    --accent:#e08a4e; --ok:#7fc09c; --warn:#e0b062; --bad:#e08b80;
-    --okbg:#1b2b23; --warnbg:#2e2617; --badbg:#2e1c1a;
+    --ground:#0f1413; --panel:#171d1c; --sunk:#121817;
+    --ink:#e9eeeb; --mute:#8c9a96; --line:#28312f;
+    --accent:#66c3a6; --accent-soft:#17322b;
+    --ok:#7cc4a1; --ok-bg:#172b22;
+    --warn:#d6a856; --warn-bg:#2c2415;
+    --bad:#dd8b83; --bad-bg:#2d1b19;
   }
 }
 :root[data-theme="dark"] {
-  --bg:#131110; --panel:#1c1917; --ink:#f0ebe4; --mute:#a09689; --line:#2e2925;
-  --accent:#e08a4e; --ok:#7fc09c; --warn:#e0b062; --bad:#e08b80;
-  --okbg:#1b2b23; --warnbg:#2e2617; --badbg:#2e1c1a;
+  --ground:#0f1413; --panel:#171d1c; --sunk:#121817;
+  --ink:#e9eeeb; --mute:#8c9a96; --line:#28312f;
+  --accent:#66c3a6; --accent-soft:#17322b;
+  --ok:#7cc4a1; --ok-bg:#172b22;
+  --warn:#d6a856; --warn-bg:#2c2415;
+  --bad:#dd8b83; --bad-bg:#2d1b19;
 }
-body { background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; margin:0; }
-.wrap { max-width:1180px; margin:0 auto; padding:40px 22px 80px; }
-header { border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:34px; }
-h1 { font-size:31px; margin:0 0 6px; letter-spacing:-.02em; }
-.tag { color:var(--mute); font-size:14px; margin:0; }
-h2 { font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--mute);
-     margin:44px 0 14px; padding-bottom:7px; border-bottom:1px solid var(--line); }
-.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px; }
-.stat { background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:16px 18px; }
-.stat.alert { border-color:var(--bad); }
-.stat .v { font-size:30px; font-weight:640; letter-spacing:-.02em; }
-.stat .l { font-size:13px; font-weight:600; margin-top:3px; }
-.stat .s { font-size:12px; color:var(--mute); }
-.agents { display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:11px; }
-.agent { background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:14px 15px; position:relative; }
-.agent h3 { margin:0; font-size:14px; letter-spacing:.02em; text-transform:uppercase; color:var(--accent); }
-.agent .who { margin:5px 0 0; font-size:13px; font-weight:600; }
-.agent .does { margin:3px 0 0; font-size:12px; color:var(--mute); }
-.agent .n { position:absolute; top:12px; right:14px; font-size:19px; font-weight:640; color:var(--mute); margin:0; }
-.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-table { width:100%; border-collapse:collapse; font-size:13.5px; background:var(--panel);
-         border:1px solid var(--line); border-radius:9px; overflow:hidden; }
-th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.07em;
-      color:var(--mute); padding:10px 13px; border-bottom:1px solid var(--line); white-space:nowrap; }
-td { padding:11px 13px; border-bottom:1px solid var(--line); vertical-align:top; }
+
+* { box-sizing:border-box; }
+body {
+  background:var(--ground); color:var(--ink);
+  font-family:var(--display); font-size:15px; line-height:1.55; margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap { max-width:1240px; margin:0 auto; padding:34px 22px 70px; }
+
+/* ---- masthead ---- */
+header { display:flex; flex-wrap:wrap; align-items:flex-end; gap:20px 30px;
+         border-bottom:2px solid var(--ink); padding-bottom:16px; }
+h1 { font-family:var(--display); font-weight:700; font-size:clamp(25px,3.4vw,34px);
+     letter-spacing:-.025em; margin:0; text-wrap:balance; }
+.sub-title { color:var(--mute); font-size:14px; margin:5px 0 0; max-width:56ch; }
+.built { margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--mute);
+         text-align:right; line-height:1.7; }
+.built b { color:var(--accent); font-weight:600; }
+
+/* ---- section headings ---- */
+h2 { font-family:var(--mono); font-size:11px; font-weight:600; text-transform:uppercase;
+     letter-spacing:.16em; color:var(--mute); margin:0 0 12px;
+     display:flex; align-items:center; gap:12px; }
+h2::after { content:""; flex:1; height:1px; background:var(--line); }
+section { margin-top:38px; }
+
+/* ---- tiles: only actionable figures ---- */
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px;
+         background:var(--line); border:1px solid var(--line); border-radius:3px; overflow:hidden; }
+.tile { background:var(--panel); padding:15px 17px 14px; display:flex; flex-direction:column; }
+.tile.live { background:var(--accent-soft); }
+.tile-v { font-family:var(--mono); font-weight:600; font-size:30px; line-height:1;
+          letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+.tile.live .tile-v { color:var(--accent); }
+.tile-l { font-size:13px; font-weight:600; margin-top:7px; }
+.tile-s { font-size:12px; color:var(--mute); margin-top:1px; }
+
+/* ---- two-column body ---- */
+.cols { display:grid; grid-template-columns:minmax(0,1fr) 268px; gap:38px; align-items:start; margin-top:38px; }
+@media (max-width:940px) { .cols { grid-template-columns:minmax(0,1fr); } aside { position:static !important; } }
+aside { position:sticky; top:22px; }
+aside section:first-child { margin-top:0; }
+.main > section:first-child { margin-top:0; }
+
+/* ---- the roster: a shift board, not cards ---- */
+.roster { list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }
+.crew { border-bottom:1px solid var(--line); padding:11px 0 12px; }
+.crew-top { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.crew-name { font-family:var(--display); font-weight:700; font-size:13px;
+             letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }
+.crew-n { font-family:var(--mono); font-weight:600; font-size:15px;
+          font-variant-numeric:tabular-nums; color:var(--ink); }
+.crew-u { font-family:var(--display); font-weight:500; font-size:10.5px; color:var(--mute);
+          text-transform:uppercase; letter-spacing:.08em; margin-left:5px; }
+.crew-who { font-family:var(--serif); font-style:italic; font-size:14px; margin:3px 0 0; }
+.crew-does { font-size:12.5px; color:var(--mute); margin:1px 0 0; }
+
+/* ---- voice evidence ---- */
+.voice { list-style:none; margin:0; padding:0; }
+.vx { padding:12px 0 13px; border-bottom:1px solid var(--line); }
+.vx:last-child { border-bottom:0; }
+.vx-role { font-family:var(--mono); font-size:10.5px; text-transform:uppercase;
+           letter-spacing:.13em; color:var(--mute); }
+.vx-line { font-family:var(--serif); font-size:16px; line-height:1.45; margin:5px 0 0;
+           border-left:2px solid var(--accent); padding-left:12px; }
+.vx-note { font-size:12.5px; color:var(--mute); margin:5px 0 0 14px; }
+
+/* ---- tables ---- */
+.scroll { overflow-x:auto; -webkit-overflow-scrolling:touch;
+          border:1px solid var(--line); border-radius:3px; background:var(--panel); }
+table { width:100%; border-collapse:collapse; font-size:13.5px; }
+th { text-align:left; font-family:var(--mono); font-size:10.5px; font-weight:600;
+     text-transform:uppercase; letter-spacing:.1em; color:var(--mute);
+     padding:10px 14px; background:var(--sunk); border-bottom:1px solid var(--line); white-space:nowrap; }
+td { padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
 tr:last-child td { border-bottom:0; }
-.sub { color:var(--mute); font-size:12px; display:block; }
-.quote { color:var(--mute); font-style:italic; }
-.pill { display:inline-block; padding:2px 9px; border-radius:99px; font-size:11.5px; font-weight:600; white-space:nowrap; }
-.pill.ok { background:var(--okbg); color:var(--ok); }
-.pill.warn { background:var(--warnbg); color:var(--warn); }
-.pill.bad { background:var(--badbg); color:var(--bad); }
-.empty { color:var(--mute); font-size:13.5px; background:var(--panel); border:1px dashed var(--line);
-          border-radius:9px; padding:20px; margin:0; }
-.gate { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
-         border-radius:0 9px 9px 0; padding:16px 20px; margin-top:14px; }
-.gate p { margin:0 0 8px; font-size:14px; }
+td strong { font-weight:600; }
+.sub { display:block; color:var(--mute); font-size:12px; font-weight:400; }
+.sub-inline { color:var(--mute); font-size:12.5px; }
+.said { font-family:var(--serif); color:var(--mute); }
+.num { font-family:var(--mono); font-size:12.5px; font-variant-numeric:tabular-nums; }
+.chip { display:inline-block; padding:2px 9px; border-radius:2px; font-family:var(--mono);
+        font-size:11px; font-weight:600; white-space:nowrap; letter-spacing:.02em; }
+.chip.ok { background:var(--ok-bg); color:var(--ok); }
+.chip.warn { background:var(--warn-bg); color:var(--warn); }
+.chip.bad { background:var(--bad-bg); color:var(--bad); }
+.chip.neutral { background:var(--sunk); color:var(--mute); }
+.empty { color:var(--mute); font-size:13.5px; background:var(--panel);
+         border:1px dashed var(--line); border-radius:3px; padding:22px; margin:0; }
+
+/* ---- the gate ---- */
+.gate { background:var(--panel); border:1px solid var(--line);
+        border-top:3px solid var(--accent); border-radius:0 0 3px 3px; padding:22px 26px; }
+.gate h3 { font-family:var(--display); font-weight:700; font-size:19px; margin:0 0 10px;
+           letter-spacing:-.015em; }
+.gate p { margin:0 0 11px; max-width:70ch; }
 .gate p:last-child { margin:0; }
-code { background:var(--bg); border:1px solid var(--line); border-radius:4px; padding:1px 6px; font-size:12.5px; }
-footer { margin-top:52px; padding-top:16px; border-top:1px solid var(--line); color:var(--mute); font-size:12.5px; }
+.flow { font-family:var(--mono); font-size:12px; color:var(--mute); background:var(--sunk);
+        border-radius:2px; padding:13px 16px; margin:0 0 15px; overflow-x:auto;
+        white-space:pre; line-height:1.75; }
+.flow b { color:var(--accent); font-weight:600; }
+code { font-family:var(--mono); font-size:12.5px; background:var(--sunk);
+       border-radius:2px; padding:1px 5px; }
+footer { margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
+         color:var(--mute); font-size:12.5px; font-family:var(--mono); line-height:1.8; }
 </style>
 
 <div class="wrap">
+
 <header>
-  <h1>Cre8or BD Command Centre</h1>
-  <p class="tag">Six agents, one voice, nothing sent without David. Generated from
-  <code>agents/state/</code> at 08 Sep 2026, 13:46 — never edited by hand.</p>
+  <div>
+    <h1>Cre8or BD Watch Board</h1>
+    <p class="sub-title">Six agents, one voice, and a gate nothing gets past without
+    David. Everything below is read from <code>agents/state/</code> — no figure on this
+    page was typed by hand.</p>
+  </div>
+  <p class="built">built <b>08 September 2026 · 13:56</b><br>cre8orai/BDAgent</p>
 </header>
 
-<h2>Where things stand</h2>
-<div class="stats"><div class="stat"><div class="v">0</div><div class="l">Awaiting your approval</div><div class="s">drafts in the outbox</div></div><div class="stat"><div class="v">0</div><div class="l">Approved, not yet out</div><div class="s">ready for send.sh</div></div><div class="stat alert"><div class="v">2</div><div class="l">You owe, overdue</div><div class="s">promises past their date</div></div><div class="stat"><div class="v">1</div><div class="l">Follow-ups due</div><div class="s">threads past cadence</div></div><div class="stat"><div class="v">4</div><div class="l">Live conversations</div><div class="s">tracked</div></div><div class="stat"><div class="v">3</div><div class="l">People sourced</div><div class="s">with a warm path where known</div></div></div>
+<section>
+  <h2>Needs a decision</h2>
+  <div class="tiles"><div class="tile live"><span class="tile-v">3</span><span class="tile-l">waiting on you</span><span class="tile-s">drafts to approve or kill</span></div><div class="tile live"><span class="tile-v">2</span><span class="tile-l">you owe, overdue</span><span class="tile-s">promises past the date you gave</span></div><div class="tile live"><span class="tile-v">1</span><span class="tile-l">follow-ups due</span><span class="tile-s">threads past their cadence</span></div><div class="tile"><span class="tile-v">0</span><span class="tile-l">cleared to go</span><span class="tile-s">approved, not yet out</span></div></div>
+</section>
 
-<h2>The team</h2>
-<div class="agents"><div class="agent"><h3>Chief</h3><p class="who">orchestrator</p><p class="does">routes, briefs, enforces the gates</p><p class="n">4</p></div><div class="agent"><h3>Scout</h3><p class="who">who is worth a call</p><p class="does">people + the warm path in</p><p class="n">3</p></div><div class="agent"><h3>Ghost</h3><p class="who">the voice</p><p class="does">every outbound passes through it</p><p class="n">0</p></div><div class="agent"><h3>Opener</h3><p class="who">first touch</p><p class="does">LinkedIn and email</p><p class="n">0</p></div><div class="agent"><h3>Chaser</h3><p class="who">never lets a thread die</p><p class="does">cadence and channel switching</p><p class="n">1</p></div><div class="agent"><h3>Desk</h3><p class="who">inbound</p><p class="does">triage and what David owes</p><p class="n">3</p></div><div class="agent"><h3>Closer</h3><p class="who">money and next step</p><p class="does">pricing discipline, deal shape</p><p class="n">1</p></div></div>
+<div class="cols">
+<div class="main">
 
-<h2>What you owe</h2>
-<div class="scroll"><table><thead><tr><th>Person</th><th>What</th><th>Your words</th><th>Due</th><th></th></tr></thead><tbody><tr><td>Rhys <span class="sub">St Johns Bay Rum</span></td><td>Feedback on Body Wash</td><td><span class="quote">“I will revert tomorrow!”</span></td><td>2026-08-31</td><td><span class="pill bad">8d late</span></td></tr><tr><td>Emma <span class="sub">[UNKNOWN]</span></td><td>Operations onboarding with Or and Katia</td><td><span class="quote">“we need to have the”</span></td><td>2026-09-05</td><td><span class="pill bad">3d late</span></td></tr><tr><td>Nate Cooper <span class="sub">Barrel VC</span></td><td>Materials / deck</td><td><span class="quote">“rather than rush the materials to you by EOD, I&#x27;ll get them to you shortly”</span></td><td>2026-09-07</td><td><span class="pill bad">1d late</span></td></tr></tbody></table></div>
+  <section>
+    <h2>What you owe</h2>
+    <div class="scroll"><table><thead><tr><th>Person</th><th>What</th><th>Your own words</th><th>Due</th><th></th></tr></thead><tbody><tr><td><strong>Rhys</strong><span class="sub">St Johns Bay Rum</span></td><td>Feedback on Body Wash</td><td><span class="said">“I will revert tomorrow!”</span></td><td><span class="num">2026-08-31</span></td><td><span class="chip bad">8 days late</span></td></tr><tr><td><strong>Emma</strong><span class="sub">[UNKNOWN]</span></td><td>Operations onboarding with Or and Katia</td><td><span class="said">“we need to have the”</span></td><td><span class="num">2026-09-05</span></td><td><span class="chip bad">3 days late</span></td></tr><tr><td><strong>Nate Cooper</strong><span class="sub">Barrel VC</span></td><td>Materials / deck</td><td><span class="said">“rather than rush the materials to you by EOD, I&#x27;ll get them to you shortly”</span></td><td><span class="num">2026-09-07</span></td><td><span class="chip bad">1 days late</span></td></tr></tbody></table></div>
+  </section>
 
-<h2>Waiting for your approval</h2>
-<p class="empty">No drafts. Run <code>bash agents/cycle.sh</code> to generate some.</p>
+  <section>
+    <h2>Waiting for your approval</h2>
+    <div class="scroll"><table><thead><tr><th>Agent</th><th>Person</th><th>Channel</th><th>Subject</th><th>Opens with</th></tr></thead><tbody><tr><td><span class="num">desk</span></td><td><strong>Nate Cooper</strong><span class="sub">Barrel VC</span></td><td><span class="num">email</span></td><td>Re: Nate &lt;&gt; Cre8or Intro</td><td><span class="said">Nate\n\nApologies for the delay on the materials. Sending them through this week…</span></td></tr><tr><td><span class="num">chaser</span></td><td><strong>Jesse Gerson</strong><span class="sub">Front Row Group</span></td><td><span class="num">email</span></td><td>Re: David Feuerstein (Cre8or) &lt;&gt; Front Row</td><td><span class="said">Jesse\n\nCongratulations on the Socium Media add-on.\n\nBumping this back up — w…</span></td></tr><tr><td><span class="num">chaser</span></td><td><strong>Eddie Krule</strong><span class="sub">Stout</span></td><td><span class="num">email</span></td><td>Front Row</td><td><span class="said">Eddie\n\nHope you are well, and thank you again for both intros — Nate and I are…</span></td></tr></tbody></table></div>
+  </section>
 
-<h2>Live conversations</h2>
-<div class="scroll"><table><thead><tr><th>Person</th><th>Thread</th><th>Channel</th><th>Touch</th><th>Waiting on</th><th>Last</th></tr></thead><tbody><tr><td>Jesse Gerson <span class="sub">Front Row Group</span></td><td>David Feuerstein (Cre8or) &lt;&gt; Front Row</td><td>email</td><td>touch 2</td><td><span class="pill ok">them</span></td><td>6d ago</td></tr><tr><td>Nate Cooper <span class="sub">Barrel VC</span></td><td>Nate &lt;&gt; Cre8or Intro</td><td>email</td><td>touch 3</td><td><span class="pill warn">david</span></td><td>5d ago</td></tr><tr><td>Noah Rosenblatt <span class="sub">BeautySpace</span></td><td>Cre8or &amp; BeautySpace</td><td>email</td><td>touch 1</td><td><span class="pill ok">them</span></td><td>0d ago</td></tr><tr><td>Monica Sultan <span class="sub">IWorld</span></td><td>IWorld - wellness assortment (Cre8or)</td><td>email</td><td>touch 1</td><td><span class="pill ok">them</span></td><td>0d ago</td></tr></tbody></table></div>
+  <section>
+    <h2>Live conversations</h2>
+    <div class="scroll"><table><thead><tr><th>Person</th><th>Thread</th><th>Channel</th><th>Touch</th><th>Waiting on</th><th>Last</th></tr></thead><tbody><tr><td><strong>Jesse Gerson</strong><span class="sub">Front Row Group</span></td><td>David Feuerstein (Cre8or) &lt;&gt; Front Row</td><td><span class="num">email</span></td><td><span class="num">2</span></td><td><span class="chip ok">them</span></td><td><span class="num">6d</span></td></tr><tr><td><strong>Nate Cooper</strong><span class="sub">Barrel VC</span></td><td>Nate &lt;&gt; Cre8or Intro</td><td><span class="num">email</span></td><td><span class="num">3</span></td><td><span class="chip warn">you</span></td><td><span class="num">5d</span></td></tr><tr><td><strong>Noah Rosenblatt</strong><span class="sub">BeautySpace</span></td><td>Cre8or &amp; BeautySpace</td><td><span class="num">email</span></td><td><span class="num">1</span></td><td><span class="chip ok">them</span></td><td><span class="num">0d</span></td></tr><tr><td><strong>Monica Sultan</strong><span class="sub">IWorld</span></td><td>IWorld - wellness assortment (Cre8or)</td><td><span class="num">email</span></td><td><span class="num">1</span></td><td><span class="chip ok">them</span></td><td><span class="num">0d</span></td></tr></tbody></table></div>
+  </section>
 
-<h2>People and the way in</h2>
-<div class="scroll"><table><thead><tr><th>Person</th><th>Company</th><th>Path</th><th>How</th><th>Why them</th><th>Stage</th></tr></thead><tbody><tr><td>Nate Cooper <span class="sub">Partner</span></td><td>Barrel VC</td><td><span class="pill ok">rank 1</span></td><td>Eddie Krule (Stout) introduced 2026-08-25; Nate replied same day asking for next week</td><td>Active Series A process; Eddie flagged fit with Nate&#x27;s focus areas</td><td><span class="pill ok">live</span></td></tr><tr><td>Noah Rosenblatt <span class="sub">[UNKNOWN]</span></td><td>BeautySpace</td><td><span class="pill ok">rank 1</span></td><td>David messaged on LinkedIn first, then escalated to email 2026-09-08</td><td>[UNKNOWN] — David has not recorded why BeautySpace matters</td><td><span class="pill ok">contacted</span></td></tr><tr><td>Jesse Gerson <span class="sub">Managing Director</span></td><td>Front Row Group</td><td><span class="pill ok">rank 2</span></td><td>Eddie Krule (Stout) introduced 2026-08-25; David replied 08-28 and followed up 09-02</td><td>Built and launched WYN Beauty for Serena Williams — assembles brands end-to-end and outsources exactly what Cre8or does</td><td><span class="pill ok">contacted</span></td></tr></tbody></table></div>
+  <section>
+    <h2>People, and the way in</h2>
+    <div class="scroll"><table><thead><tr><th>Person</th><th>Company</th><th>Path</th><th>How</th><th>Why them, why now</th><th>Stage</th></tr></thead><tbody><tr><td><strong>Nate Cooper</strong><span class="sub">Partner</span></td><td>Barrel VC</td><td><span class="chip ok">path 1</span></td><td>Eddie Krule (Stout) introduced 2026-08-25; Nate replied same day asking for next week</td><td>Active Series A process; Eddie flagged fit with Nate&#x27;s focus areas</td><td><span class="chip neutral">live</span></td></tr><tr><td><strong>Noah Rosenblatt</strong><span class="sub">[UNKNOWN]</span></td><td>BeautySpace</td><td><span class="chip ok">path 1</span></td><td>David messaged on LinkedIn first, then escalated to email 2026-09-08</td><td>[UNKNOWN] — David has not recorded why BeautySpace matters</td><td><span class="chip neutral">contacted</span></td></tr><tr><td><strong>Jesse Gerson</strong><span class="sub">Managing Director</span></td><td>Front Row Group</td><td><span class="chip ok">path 2</span></td><td>Eddie Krule (Stout) introduced 2026-08-25; David replied 08-28 and followed up 09-02</td><td>Built and launched WYN Beauty for Serena Williams — assembles brands end-to-end and outsources exactly what Cre8or does</td><td><span class="chip neutral">contacted</span></td></tr></tbody></table></div>
+  </section>
 
-<h2>Reasons to reach out, before they go stale</h2>
-<div class="scroll"><table><thead><tr><th>Company</th><th>Signal</th><th>Source</th><th>Expires</th><th>Used</th></tr></thead><tbody><tr><td>Front Row Group</td><td>Socium Media add-on acquisition</td><td>Eddie Krule email 2026-08-25</td><td>2026-09-30</td><td><span class="pill warn">no</span></td></tr><tr><td>Cre8or</td><td>David in NYC start of November</td><td>David&#x27;s own sent mail 2026-09-08</td><td>2026-11-08</td><td><span class="pill warn">partial</span></td></tr></tbody></table></div>
+  <section>
+    <h2>Reasons to write, before they go stale</h2>
+    <div class="scroll"><table><thead><tr><th>Company</th><th>Signal</th><th>Source</th><th>Expires</th><th></th></tr></thead><tbody><tr><td><strong>Front Row Group</strong></td><td>Socium Media add-on acquisition</td><td><span class="sub-inline">Eddie Krule email 2026-08-25</span></td><td><span class="num">2026-09-30</span></td><td><span class="chip warn">no</span></td></tr><tr><td><strong>Cre8or</strong></td><td>David in NYC start of November</td><td><span class="sub-inline">David&#x27;s own sent mail 2026-09-08</span></td><td><span class="num">2026-11-08</span></td><td><span class="chip warn">partial</span></td></tr></tbody></table></div>
+  </section>
 
-<h2>The gate</h2>
-<div class="gate">
-  <p><strong>No agent here has a send tool.</strong> Every agent writes to
-  <code>agents/state/outbox.csv</code> with <code>status=draft</code> and stops.</p>
-  <p>David reviews with <code>bash agents/review.sh</code>, and only rows he marks
-  <code>approved</code> are ever transmitted — by <code>agents/send.sh</code>, in the
-  foreground, after he types <code>SEND</code>.</p>
-  <p>LinkedIn is capped at 8 messages per session, 40–90 seconds apart, and any
-  captcha or checkpoint stops the whole run rather than retrying.</p>
 </div>
 
+<aside>
+  <section>
+    <h2>On watch</h2>
+    <ul class="roster"><li class="crew"><div class="crew-top"><span class="crew-name">Chief</span><span class="crew-n">4<span class="crew-u">threads</span></span></div><p class="crew-who">at his desk on Monday</p><p class="crew-does">routes, briefs, holds the gate</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Scout</span><span class="crew-n">3<span class="crew-u">people</span></span></div><p class="crew-who">the prospector</p><p class="crew-does">who is worth a call, and the way in</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Ghost</span><span class="crew-n">3<span class="crew-u">written</span></span></div><p class="crew-who">the writer</p><p class="crew-does">every outbound passes through it</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Opener</span><span class="crew-n">0<span class="crew-u">opened</span></span></div><p class="crew-who">at the handshake</p><p class="crew-does">first touch, LinkedIn and email</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Chaser</span><span class="crew-n">1<span class="crew-u">due</span></span></div><p class="crew-who">who won&#x27;t let a thread die</p><p class="crew-does">cadence, channel, when to stop</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Desk</span><span class="crew-n">3<span class="crew-u">tracked</span></span></div><p class="crew-who">at 6am with coffee</p><p class="crew-does">inbound, and what he owes</p></li><li class="crew"><div class="crew-top"><span class="crew-name">Closer</span><span class="crew-n">1<span class="crew-u">at stake</span></span></div><p class="crew-who">in the negotiation</p><p class="crew-does">price floor, deal shape, next step</p></li></ul>
+  </section>
+
+  <section>
+    <h2>Whose voice</h2>
+    <ul class="voice"><li class="vx"><span class="vx-role">the greeting</span><p class="vx-line">Jesse hello</p><p class="vx-note">his name-on-its-own-line opener, not “Hi Jesse,”</p></li><li class="vx"><span class="vx-role">the follow-up</span><p class="vx-line">Millie following up again... have time to speak next week?</p><p class="vx-note">10–25 words. his verb is “bump”, never “circle back”</p></li><li class="vx"><span class="vx-role">the close</span><p class="vx-line">Let&#x27;s Cre8!</p><p class="vx-note">ends essentially every message he sends</p></li><li class="vx"><span class="vx-role">the restraint</span><p class="vx-line">I would love to learn a bit more about BeautySpace and share elements of Cre8or with you.</p><p class="vx-note">43-word first touch. he does not pitch — he offers to, on a call</p></li><li class="vx"><span class="vx-role">the manners</span><p class="vx-line">Eddie thanks for the intro.</p><p class="vx-note">the introducer is thanked by name, then moved to BCC</p></li></ul>
+  </section>
+</aside>
+</div>
+
+<section>
+  <h2>The gate</h2>
+  <div class="gate">
+    <h3>No agent here has a way to send anything.</h3>
+    <p class="flow">Scout · Desk · Chaser · Closer
+      └─► <b>GHOST</b> (the voice)
+            └─► outbox.csv   <b>status = draft</b>   ◄── and it stops here
+                  └─► <b>DAVID</b> reads each one, approves or kills
+                        └─► send.sh   ── Gmail / LinkedIn</p>
+    <p>Agents write rows and stop. <code>agents/send.sh</code> is the only script that
+    reaches anyone, it exits immediately without an interactive terminal, and it acts on
+    nothing but rows marked <code>approved</code>. Two permission profiles enforce that
+    in code rather than in a prompt — the scheduled profile denies the mail and browser
+    tools outright.</p>
+    <p>LinkedIn work is capped at 8 per session, 40–90 seconds apart, once a day, and
+    stops the whole run on any challenge screen rather than retrying. Three reasons, each
+    sufficient on its own: domain reputation, LinkedIn's User Agreement, and the fact
+    that it is David's name on every one of them.</p>
+  </div>
+</section>
+
 <footer>
-  Built by <code>agents/build_dashboard.py</code> after every run ·
-  <code>github.com/cre8orai/BDAgent</code> · voice derived from 287 of David's own
-  sent messages, Feb 2025 – Sep 2026
+  regenerated by agents/build_dashboard.py after every run<br>
+  voice derived from 287 of David's own sent messages · Feb 2025 – Sep 2026<br>
+  github.com/cre8orai/BDAgent
 </footer>
 </div>

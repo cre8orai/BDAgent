@@ -39,30 +39,38 @@ signals = read("signals.csv")
 
 drafts = [r for r in outbox if r["status"] == "draft"]
 approved = [r for r in outbox if r["status"] == "approved"]
-sent = [r for r in outbox if r["status"] == "sent"]
 overdue = [r for r in commits if r["status"].upper() == "OVERDUE"]
 due = [r for r in cadence if r["status"] == "due"]
-waiting_them = [r for r in threads if r["waiting_on"] == "them"]
-needs_david = [r for r in threads if r["bucket"] == "needs-david"]
 
-AGENTS = [
-    ("Chief", "orchestrator", "routes, briefs, enforces the gates", len(threads)),
-    ("Scout", "who is worth a call", "people + the warm path in", len(people)),
-    ("Ghost", "the voice", "every outbound passes through it", len(outbox)),
-    ("Opener", "first touch", "LinkedIn and email", len([r for r in outbox if r["agent"] == "opener"])),
-    ("Chaser", "never lets a thread die", "cadence and channel switching", len(due)),
-    ("Desk", "inbound", "triage and what David owes", len(commits)),
-    ("Closer", "money and next step", "pricing discipline, deal shape", len(needs_david)),
+# The roster. count is what that agent is currently responsible for.
+ROSTER = [
+    ("Chief", "at his desk on Monday", "routes, briefs, holds the gate", len(threads), "threads"),
+    ("Scout", "the prospector", "who is worth a call, and the way in", len(people), "people"),
+    ("Ghost", "the writer", "every outbound passes through it", len(outbox), "written"),
+    ("Opener", "at the handshake", "first touch, LinkedIn and email",
+     len([r for r in outbox if r.get("agent") == "opener"]), "opened"),
+    ("Chaser", "who won't let a thread die", "cadence, channel, when to stop", len(due), "due"),
+    ("Desk", "at 6am with coffee", "inbound, and what he owes", len(commits), "tracked"),
+    ("Closer", "in the negotiation", "price floor, deal shape, next step",
+     len([r for r in threads if r["bucket"] == "needs-david"]), "at stake"),
 ]
 
-rows_stat = [
-    ("Awaiting your approval", len(drafts), "draft" if len(drafts) == 1 else "drafts in the outbox"),
-    ("Approved, not yet out", len(approved), "ready for send.sh"),
-    ("You owe, overdue", len(overdue), "promises past their date"),
-    ("Follow-ups due", len(due), "threads past cadence"),
-    ("Live conversations", len(threads), "tracked"),
-    ("People sourced", len(people), "with a warm path where known"),
+# Lines David actually wrote, carried through from voice/STYLE.md. This is the
+# detail only this subject has: the agents' authority is his own sent mail.
+VOICE = [
+    ("the greeting", "Jesse hello", "his name-on-its-own-line opener, not “Hi Jesse,”"),
+    ("the follow-up", "Millie following up again... have time to speak next week?",
+     "10–25 words. his verb is “bump”, never “circle back”"),
+    ("the close", "Let's Cre8!", "ends essentially every message he sends"),
+    ("the restraint", "I would love to learn a bit more about BeautySpace and share elements of Cre8or with you.",
+     "43-word first touch. he does not pitch — he offers to, on a call"),
+    ("the manners", "Eddie thanks for the intro.",
+     "the introducer is thanked by name, then moved to BCC"),
 ]
+
+
+def esc_t(s):
+    return esc(s)
 
 
 def table(headers, rows, empty="Nothing here yet."):
@@ -73,8 +81,8 @@ def table(headers, rows, empty="Nothing here yet."):
     return f'<div class="scroll"><table><thead><tr>{h}</tr></thead><tbody>{b}</tbody></table></div>'
 
 
-def pill(text, kind):
-    return f'<span class="pill {kind}">{esc(text)}</span>'
+def chip(text, kind):
+    return f'<span class="chip {kind}">{esc(text)}</span>'
 
 
 commit_rows = []
@@ -82,165 +90,310 @@ for c in sorted(commits, key=lambda r: r["due"]):
     d = days_since(c["due"])
     late = d is not None and d > 0
     commit_rows.append([
-        esc(c["person"]) + f' <span class="sub">{esc(c["company"])}</span>',
+        f'<strong>{esc(c["person"])}</strong><span class="sub">{esc(c["company"])}</span>',
         esc(c["what"]),
-        f'<span class="quote">“{esc(c["promised_words"])}”</span>',
-        esc(c["due"]),
-        pill(f"{d}d late" if late else "open", "bad" if late else "ok"),
+        f'<span class="said">“{esc(c["promised_words"])}”</span>',
+        f'<span class="num">{esc(c["due"])}</span>',
+        chip(f"{d} days late" if late else "open", "bad" if late else "ok"),
     ])
 
 thread_rows = []
 for t in sorted(threads, key=lambda r: r["last_touched"]):
     d = days_since(t["last_touched"])
     thread_rows.append([
-        esc(t["person"]) + f' <span class="sub">{esc(t["company"])}</span>',
+        f'<strong>{esc(t["person"])}</strong><span class="sub">{esc(t["company"])}</span>',
         esc(t["subject"]),
-        esc(t["channel"]),
-        f"touch {esc(t['touch_number'])}",
-        pill(t["waiting_on"], "warn" if t["waiting_on"] == "david" else "ok"),
-        f'{d}d ago' if d is not None else "—",
+        f'<span class="num">{esc(t["channel"])}</span>',
+        f'<span class="num">{esc(t["touch_number"])}</span>',
+        chip("you" if t["waiting_on"] == "david" else "them",
+             "warn" if t["waiting_on"] == "david" else "ok"),
+        f'<span class="num">{d}d</span>' if d is not None else "—",
     ])
 
 people_rows = []
 for p in sorted(people, key=lambda r: r["warm_path_rank"]):
+    rank = p["warm_path_rank"]
     people_rows.append([
-        esc(p["name"]) + f' <span class="sub">{esc(p["title"])}</span>',
+        f'<strong>{esc(p["name"])}</strong><span class="sub">{esc(p["title"])}</span>',
         esc(p["company"]),
-        pill(f"rank {p['warm_path_rank']}", "ok" if p["warm_path_rank"] in ("1", "2") else "warn"),
+        chip(f"path {rank}", "ok" if rank in ("1", "2") else "warn"),
         esc(p["warm_path"]),
-        esc(p["evidence"])[:120],
-        pill(p["stage"], "ok"),
+        esc(p["evidence"])[:130],
+        chip(p["stage"], "neutral"),
     ])
 
 draft_rows = [[
-    esc(r["agent"]), esc(r["person"]) + f' <span class="sub">{esc(r["company"])}</span>',
-    esc(r["channel"]), esc(r["subject"]), esc(r["body"])[:90] + "…",
+    f'<span class="num">{esc(r["agent"])}</span>',
+    f'<strong>{esc(r["person"])}</strong><span class="sub">{esc(r["company"])}</span>',
+    f'<span class="num">{esc(r["channel"])}</span>',
+    esc(r["subject"]),
+    f'<span class="said">{esc(r["body"])[:80]}…</span>',
 ] for r in drafts]
 
 signal_rows = [[
-    esc(s["company"]), esc(s["signal"]), esc(s["source"]), esc(s["expires_on"]),
-    pill(s["acted_on"], "ok" if s["acted_on"] == "yes" else "warn"),
+    f'<strong>{esc(s["company"])}</strong>',
+    esc(s["signal"]),
+    f'<span class="sub-inline">{esc(s["source"])}</span>',
+    f'<span class="num">{esc(s["expires_on"])}</span>',
+    chip("used" if s["acted_on"] == "yes" else s["acted_on"],
+         "ok" if s["acted_on"] == "yes" else "warn"),
 ] for s in signals]
 
-agent_cards = "".join(
-    f'<div class="agent"><h3>{esc(n)}</h3><p class="who">{esc(w)}</p>'
-    f'<p class="does">{esc(d)}</p><p class="n">{c}</p></div>'
-    for n, w, d, c in AGENTS)
+roster_html = "".join(
+    f'<li class="crew"><div class="crew-top"><span class="crew-name">{esc(n)}</span>'
+    f'<span class="crew-n">{c}<span class="crew-u">{esc(u)}</span></span></div>'
+    f'<p class="crew-who">{esc(w)}</p><p class="crew-does">{esc(d)}</p></li>'
+    for n, w, d, c, u in ROSTER)
 
-stat_cards = "".join(
-    f'<div class="stat{" alert" if (lbl.startswith("You owe") and v) else ""}">'
-    f'<div class="v">{v}</div><div class="l">{esc(lbl)}</div>'
-    f'<div class="s">{esc(sub)}</div></div>'
-    for lbl, v, sub in rows_stat)
+voice_html = "".join(
+    f'<li class="vx"><span class="vx-role">{esc(role)}</span>'
+    f'<p class="vx-line">{esc(line)}</p><p class="vx-note">{esc(note)}</p></li>'
+    for role, line, note in VOICE)
 
-now = datetime.datetime.now().strftime("%d %b %Y, %H:%M")
+# Only figures that imply an action get a tile.
+TILES = [
+    (len(drafts), "waiting on you", "drafts to approve or kill", len(drafts) > 0),
+    (len(overdue), "you owe, overdue", "promises past the date you gave", len(overdue) > 0),
+    (len(due), "follow-ups due", "threads past their cadence", len(due) > 0),
+    (len(approved), "cleared to go", "approved, not yet out", False),
+]
+tiles_html = "".join(
+    f'<div class="tile{" live" if live else ""}"><span class="tile-v">{v}</span>'
+    f'<span class="tile-l">{esc(l)}</span><span class="tile-s">{esc(s)}</span></div>'
+    for v, l, s, live in TILES)
 
-HTML = f"""<title>Cre8or BD Command Centre</title>
+now = datetime.datetime.now().strftime("%d %B %Y · %H:%M")
+
+HTML = f"""<title>Cre8or BD Watch Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
 :root {{
-  --bg:#faf9f7; --panel:#fff; --ink:#16130f; --mute:#6b6259; --line:#e6e1da;
-  --accent:#b4531f; --ok:#2f6b4f; --warn:#a8761c; --bad:#a33232;
-  --okbg:#e8f2ec; --warnbg:#faf0dc; --badbg:#f8e8e6;
+  --ground:#f1f3f1; --panel:#fdfdfc; --sunk:#e8ebe8;
+  --ink:#14191a; --mute:#5d6a68; --line:#d8ddda;
+  --accent:#1c5b4c; --accent-soft:#e2ede9;
+  --ok:#2c6a4d; --ok-bg:#e4efe8;
+  --warn:#8a6210; --warn-bg:#f6ecd8;
+  --bad:#93312c; --bad-bg:#f7e5e3;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }}
 @media (prefers-color-scheme: dark) {{
   :root:not([data-theme="light"]) {{
-    --bg:#131110; --panel:#1c1917; --ink:#f0ebe4; --mute:#a09689; --line:#2e2925;
-    --accent:#e08a4e; --ok:#7fc09c; --warn:#e0b062; --bad:#e08b80;
-    --okbg:#1b2b23; --warnbg:#2e2617; --badbg:#2e1c1a;
+    --ground:#0f1413; --panel:#171d1c; --sunk:#121817;
+    --ink:#e9eeeb; --mute:#8c9a96; --line:#28312f;
+    --accent:#66c3a6; --accent-soft:#17322b;
+    --ok:#7cc4a1; --ok-bg:#172b22;
+    --warn:#d6a856; --warn-bg:#2c2415;
+    --bad:#dd8b83; --bad-bg:#2d1b19;
   }}
 }}
 :root[data-theme="dark"] {{
-  --bg:#131110; --panel:#1c1917; --ink:#f0ebe4; --mute:#a09689; --line:#2e2925;
-  --accent:#e08a4e; --ok:#7fc09c; --warn:#e0b062; --bad:#e08b80;
-  --okbg:#1b2b23; --warnbg:#2e2617; --badbg:#2e1c1a;
+  --ground:#0f1413; --panel:#171d1c; --sunk:#121817;
+  --ink:#e9eeeb; --mute:#8c9a96; --line:#28312f;
+  --accent:#66c3a6; --accent-soft:#17322b;
+  --ok:#7cc4a1; --ok-bg:#172b22;
+  --warn:#d6a856; --warn-bg:#2c2415;
+  --bad:#dd8b83; --bad-bg:#2d1b19;
 }}
-body {{ background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; margin:0; }}
-.wrap {{ max-width:1180px; margin:0 auto; padding:40px 22px 80px; }}
-header {{ border-bottom:2px solid var(--ink); padding-bottom:18px; margin-bottom:34px; }}
-h1 {{ font-size:31px; margin:0 0 6px; letter-spacing:-.02em; }}
-.tag {{ color:var(--mute); font-size:14px; margin:0; }}
-h2 {{ font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--mute);
-     margin:44px 0 14px; padding-bottom:7px; border-bottom:1px solid var(--line); }}
-.stats {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px; }}
-.stat {{ background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:16px 18px; }}
-.stat.alert {{ border-color:var(--bad); }}
-.stat .v {{ font-size:30px; font-weight:640; letter-spacing:-.02em; }}
-.stat .l {{ font-size:13px; font-weight:600; margin-top:3px; }}
-.stat .s {{ font-size:12px; color:var(--mute); }}
-.agents {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:11px; }}
-.agent {{ background:var(--panel); border:1px solid var(--line); border-radius:9px; padding:14px 15px; position:relative; }}
-.agent h3 {{ margin:0; font-size:14px; letter-spacing:.02em; text-transform:uppercase; color:var(--accent); }}
-.agent .who {{ margin:5px 0 0; font-size:13px; font-weight:600; }}
-.agent .does {{ margin:3px 0 0; font-size:12px; color:var(--mute); }}
-.agent .n {{ position:absolute; top:12px; right:14px; font-size:19px; font-weight:640; color:var(--mute); margin:0; }}
-.scroll {{ overflow-x:auto; -webkit-overflow-scrolling:touch; }}
-table {{ width:100%; border-collapse:collapse; font-size:13.5px; background:var(--panel);
-         border:1px solid var(--line); border-radius:9px; overflow:hidden; }}
-th {{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.07em;
-      color:var(--mute); padding:10px 13px; border-bottom:1px solid var(--line); white-space:nowrap; }}
-td {{ padding:11px 13px; border-bottom:1px solid var(--line); vertical-align:top; }}
+
+* {{ box-sizing:border-box; }}
+body {{
+  background:var(--ground); color:var(--ink);
+  font-family:var(--display); font-size:15px; line-height:1.55; margin:0;
+  -webkit-font-smoothing:antialiased;
+}}
+.wrap {{ max-width:1240px; margin:0 auto; padding:34px 22px 70px; }}
+
+/* ---- masthead ---- */
+header {{ display:flex; flex-wrap:wrap; align-items:flex-end; gap:20px 30px;
+         border-bottom:2px solid var(--ink); padding-bottom:16px; }}
+h1 {{ font-family:var(--display); font-weight:700; font-size:clamp(25px,3.4vw,34px);
+     letter-spacing:-.025em; margin:0; text-wrap:balance; }}
+.sub-title {{ color:var(--mute); font-size:14px; margin:5px 0 0; max-width:56ch; }}
+.built {{ margin-left:auto; font-family:var(--mono); font-size:11.5px; color:var(--mute);
+         text-align:right; line-height:1.7; }}
+.built b {{ color:var(--accent); font-weight:600; }}
+
+/* ---- section headings ---- */
+h2 {{ font-family:var(--mono); font-size:11px; font-weight:600; text-transform:uppercase;
+     letter-spacing:.16em; color:var(--mute); margin:0 0 12px;
+     display:flex; align-items:center; gap:12px; }}
+h2::after {{ content:""; flex:1; height:1px; background:var(--line); }}
+section {{ margin-top:38px; }}
+
+/* ---- tiles: only actionable figures ---- */
+.tiles {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px;
+         background:var(--line); border:1px solid var(--line); border-radius:3px; overflow:hidden; }}
+.tile {{ background:var(--panel); padding:15px 17px 14px; display:flex; flex-direction:column; }}
+.tile.live {{ background:var(--accent-soft); }}
+.tile-v {{ font-family:var(--mono); font-weight:600; font-size:30px; line-height:1;
+          letter-spacing:-.03em; font-variant-numeric:tabular-nums; }}
+.tile.live .tile-v {{ color:var(--accent); }}
+.tile-l {{ font-size:13px; font-weight:600; margin-top:7px; }}
+.tile-s {{ font-size:12px; color:var(--mute); margin-top:1px; }}
+
+/* ---- two-column body ---- */
+.cols {{ display:grid; grid-template-columns:minmax(0,1fr) 268px; gap:38px; align-items:start; margin-top:38px; }}
+@media (max-width:940px) {{ .cols {{ grid-template-columns:minmax(0,1fr); }} aside {{ position:static !important; }} }}
+aside {{ position:sticky; top:22px; }}
+aside section:first-child {{ margin-top:0; }}
+.main > section:first-child {{ margin-top:0; }}
+
+/* ---- the roster: a shift board, not cards ---- */
+.roster {{ list-style:none; margin:0; padding:0; border-top:1px solid var(--line); }}
+.crew {{ border-bottom:1px solid var(--line); padding:11px 0 12px; }}
+.crew-top {{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; }}
+.crew-name {{ font-family:var(--display); font-weight:700; font-size:13px;
+             letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }}
+.crew-n {{ font-family:var(--mono); font-weight:600; font-size:15px;
+          font-variant-numeric:tabular-nums; color:var(--ink); }}
+.crew-u {{ font-family:var(--display); font-weight:500; font-size:10.5px; color:var(--mute);
+          text-transform:uppercase; letter-spacing:.08em; margin-left:5px; }}
+.crew-who {{ font-family:var(--serif); font-style:italic; font-size:14px; margin:3px 0 0; }}
+.crew-does {{ font-size:12.5px; color:var(--mute); margin:1px 0 0; }}
+
+/* ---- voice evidence ---- */
+.voice {{ list-style:none; margin:0; padding:0; }}
+.vx {{ padding:12px 0 13px; border-bottom:1px solid var(--line); }}
+.vx:last-child {{ border-bottom:0; }}
+.vx-role {{ font-family:var(--mono); font-size:10.5px; text-transform:uppercase;
+           letter-spacing:.13em; color:var(--mute); }}
+.vx-line {{ font-family:var(--serif); font-size:16px; line-height:1.45; margin:5px 0 0;
+           border-left:2px solid var(--accent); padding-left:12px; }}
+.vx-note {{ font-size:12.5px; color:var(--mute); margin:5px 0 0 14px; }}
+
+/* ---- tables ---- */
+.scroll {{ overflow-x:auto; -webkit-overflow-scrolling:touch;
+          border:1px solid var(--line); border-radius:3px; background:var(--panel); }}
+table {{ width:100%; border-collapse:collapse; font-size:13.5px; }}
+th {{ text-align:left; font-family:var(--mono); font-size:10.5px; font-weight:600;
+     text-transform:uppercase; letter-spacing:.1em; color:var(--mute);
+     padding:10px 14px; background:var(--sunk); border-bottom:1px solid var(--line); white-space:nowrap; }}
+td {{ padding:12px 14px; border-bottom:1px solid var(--line); vertical-align:top; }}
 tr:last-child td {{ border-bottom:0; }}
-.sub {{ color:var(--mute); font-size:12px; display:block; }}
-.quote {{ color:var(--mute); font-style:italic; }}
-.pill {{ display:inline-block; padding:2px 9px; border-radius:99px; font-size:11.5px; font-weight:600; white-space:nowrap; }}
-.pill.ok {{ background:var(--okbg); color:var(--ok); }}
-.pill.warn {{ background:var(--warnbg); color:var(--warn); }}
-.pill.bad {{ background:var(--badbg); color:var(--bad); }}
-.empty {{ color:var(--mute); font-size:13.5px; background:var(--panel); border:1px dashed var(--line);
-          border-radius:9px; padding:20px; margin:0; }}
-.gate {{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent);
-         border-radius:0 9px 9px 0; padding:16px 20px; margin-top:14px; }}
-.gate p {{ margin:0 0 8px; font-size:14px; }}
+td strong {{ font-weight:600; }}
+.sub {{ display:block; color:var(--mute); font-size:12px; font-weight:400; }}
+.sub-inline {{ color:var(--mute); font-size:12.5px; }}
+.said {{ font-family:var(--serif); color:var(--mute); }}
+.num {{ font-family:var(--mono); font-size:12.5px; font-variant-numeric:tabular-nums; }}
+.chip {{ display:inline-block; padding:2px 9px; border-radius:2px; font-family:var(--mono);
+        font-size:11px; font-weight:600; white-space:nowrap; letter-spacing:.02em; }}
+.chip.ok {{ background:var(--ok-bg); color:var(--ok); }}
+.chip.warn {{ background:var(--warn-bg); color:var(--warn); }}
+.chip.bad {{ background:var(--bad-bg); color:var(--bad); }}
+.chip.neutral {{ background:var(--sunk); color:var(--mute); }}
+.empty {{ color:var(--mute); font-size:13.5px; background:var(--panel);
+         border:1px dashed var(--line); border-radius:3px; padding:22px; margin:0; }}
+
+/* ---- the gate ---- */
+.gate {{ background:var(--panel); border:1px solid var(--line);
+        border-top:3px solid var(--accent); border-radius:0 0 3px 3px; padding:22px 26px; }}
+.gate h3 {{ font-family:var(--display); font-weight:700; font-size:19px; margin:0 0 10px;
+           letter-spacing:-.015em; }}
+.gate p {{ margin:0 0 11px; max-width:70ch; }}
 .gate p:last-child {{ margin:0; }}
-code {{ background:var(--bg); border:1px solid var(--line); border-radius:4px; padding:1px 6px; font-size:12.5px; }}
-footer {{ margin-top:52px; padding-top:16px; border-top:1px solid var(--line); color:var(--mute); font-size:12.5px; }}
+.flow {{ font-family:var(--mono); font-size:12px; color:var(--mute); background:var(--sunk);
+        border-radius:2px; padding:13px 16px; margin:0 0 15px; overflow-x:auto;
+        white-space:pre; line-height:1.75; }}
+.flow b {{ color:var(--accent); font-weight:600; }}
+code {{ font-family:var(--mono); font-size:12.5px; background:var(--sunk);
+       border-radius:2px; padding:1px 5px; }}
+footer {{ margin-top:46px; padding-top:15px; border-top:1px solid var(--line);
+         color:var(--mute); font-size:12.5px; font-family:var(--mono); line-height:1.8; }}
 </style>
 
 <div class="wrap">
+
 <header>
-  <h1>Cre8or BD Command Centre</h1>
-  <p class="tag">Six agents, one voice, nothing sent without David. Generated from
-  <code>agents/state/</code> at {now} — never edited by hand.</p>
+  <div>
+    <h1>Cre8or BD Watch Board</h1>
+    <p class="sub-title">Six agents, one voice, and a gate nothing gets past without
+    David. Everything below is read from <code>agents/state/</code> — no figure on this
+    page was typed by hand.</p>
+  </div>
+  <p class="built">built <b>{now}</b><br>cre8orai/BDAgent</p>
 </header>
 
-<h2>Where things stand</h2>
-<div class="stats">{stat_cards}</div>
+<section>
+  <h2>Needs a decision</h2>
+  <div class="tiles">{tiles_html}</div>
+</section>
 
-<h2>The team</h2>
-<div class="agents">{agent_cards}</div>
+<div class="cols">
+<div class="main">
 
-<h2>What you owe</h2>
-{table(["Person", "What", "Your words", "Due", ""], commit_rows,
-       "No open commitments. Desk had nothing to catch.")}
+  <section>
+    <h2>What you owe</h2>
+    {table(["Person", "What", "Your own words", "Due", ""], commit_rows,
+           "No open commitments — Desk found nothing you promised and haven't delivered.")}
+  </section>
 
-<h2>Waiting for your approval</h2>
-{table(["Agent", "Person", "Channel", "Subject", "Opens with"], draft_rows,
-       "No drafts. Run <code>bash agents/cycle.sh</code> to generate some.")}
+  <section>
+    <h2>Waiting for your approval</h2>
+    {table(["Agent", "Person", "Channel", "Subject", "Opens with"], draft_rows,
+           "No drafts. Run <code>bash agents/cycle.sh</code> to generate some.")}
+  </section>
 
-<h2>Live conversations</h2>
-{table(["Person", "Thread", "Channel", "Touch", "Waiting on", "Last"], thread_rows)}
+  <section>
+    <h2>Live conversations</h2>
+    {table(["Person", "Thread", "Channel", "Touch", "Waiting on", "Last"], thread_rows)}
+  </section>
 
-<h2>People and the way in</h2>
-{table(["Person", "Company", "Path", "How", "Why them", "Stage"], people_rows)}
+  <section>
+    <h2>People, and the way in</h2>
+    {table(["Person", "Company", "Path", "How", "Why them, why now", "Stage"], people_rows,
+           "No people sourced yet. Scout reads RetailGTM's qualified accounts first.")}
+  </section>
 
-<h2>Reasons to reach out, before they go stale</h2>
-{table(["Company", "Signal", "Source", "Expires", "Used"], signal_rows)}
+  <section>
+    <h2>Reasons to write, before they go stale</h2>
+    {table(["Company", "Signal", "Source", "Expires", ""], signal_rows,
+           "No live signals. Desk writes these from inbound mail.")}
+  </section>
 
-<h2>The gate</h2>
-<div class="gate">
-  <p><strong>No agent here has a send tool.</strong> Every agent writes to
-  <code>agents/state/outbox.csv</code> with <code>status=draft</code> and stops.</p>
-  <p>David reviews with <code>bash agents/review.sh</code>, and only rows he marks
-  <code>approved</code> are ever transmitted — by <code>agents/send.sh</code>, in the
-  foreground, after he types <code>SEND</code>.</p>
-  <p>LinkedIn is capped at 8 messages per session, 40–90 seconds apart, and any
-  captcha or checkpoint stops the whole run rather than retrying.</p>
 </div>
 
+<aside>
+  <section>
+    <h2>On watch</h2>
+    <ul class="roster">{roster_html}</ul>
+  </section>
+
+  <section>
+    <h2>Whose voice</h2>
+    <ul class="voice">{voice_html}</ul>
+  </section>
+</aside>
+</div>
+
+<section>
+  <h2>The gate</h2>
+  <div class="gate">
+    <h3>No agent here has a way to send anything.</h3>
+    <p class="flow">Scout · Desk · Chaser · Closer
+      └─► <b>GHOST</b> (the voice)
+            └─► outbox.csv   <b>status = draft</b>   ◄── and it stops here
+                  └─► <b>DAVID</b> reads each one, approves or kills
+                        └─► send.sh   ── Gmail / LinkedIn</p>
+    <p>Agents write rows and stop. <code>agents/send.sh</code> is the only script that
+    reaches anyone, it exits immediately without an interactive terminal, and it acts on
+    nothing but rows marked <code>approved</code>. Two permission profiles enforce that
+    in code rather than in a prompt — the scheduled profile denies the mail and browser
+    tools outright.</p>
+    <p>LinkedIn work is capped at 8 per session, 40–90 seconds apart, once a day, and
+    stops the whole run on any challenge screen rather than retrying. Three reasons, each
+    sufficient on its own: domain reputation, LinkedIn's User Agreement, and the fact
+    that it is David's name on every one of them.</p>
+  </div>
+</section>
+
 <footer>
-  Built by <code>agents/build_dashboard.py</code> after every run ·
-  <code>github.com/cre8orai/BDAgent</code> · voice derived from 287 of David's own
-  sent messages, Feb 2025 – Sep 2026
+  regenerated by agents/build_dashboard.py after every run<br>
+  voice derived from 287 of David's own sent messages · Feb 2025 – Sep 2026<br>
+  github.com/cre8orai/BDAgent
 </footer>
 </div>
 """
@@ -248,4 +401,4 @@ footer {{ margin-top:52px; padding-top:16px; border-top:1px solid var(--line); c
 with open(OUT, "w") as f:
     f.write(HTML)
 print(f"pipeline.html rebuilt — {len(threads)} threads, {len(drafts)} drafts, "
-      f"{len(overdue)} overdue commitments")
+      f"{len(overdue)} overdue commitments, {len(people)} people")
