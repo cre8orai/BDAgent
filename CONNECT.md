@@ -110,19 +110,22 @@ automated messaging, and enforcement is account restriction. Your LinkedIn is a
 Losing it would cost more than anything a campaign could earn. Hand-paced and approved
 is not a limitation here — it is the only version worth building.
 
-### Your archive
+### Your archive — done
 
-When you export it (**Settings → Data privacy → Get a copy of your data →
-Messages**), drop the CSV into `voice/raw/` and:
+Ingested 2026-09-08 from `Basic_LinkedInDataExport_09-07-2026`. It gave four things:
 
-```bash
-python3 voice/ingest.py --stats
-```
+| | |
+|---|---|
+| **2,558 LinkedIn messages** you sent, 2005–2026 | Rewrote `voice/STYLE.md` §12 from evidence — it is no longer `[ASSUMPTION]` |
+| **38 connection notes** | Your real median is **34 characters**, not the 300 limit |
+| **7,246 connections** | `agents/state/connections.csv` — Scout's first-degree graph |
+| **Confirmation** | `Let's Cre8!` appears **0 times** in 2,558 LinkedIn messages. The email close does not belong there |
 
-That replaces [`voice/STYLE.md`](voice/STYLE.md) §12 — currently marked
-`[ASSUMPTION]` — with your actual LinkedIn register. LinkedIn is a different voice
-from email: shorter, no signature, and you use it to open rather than to close. Right
-now the agents are inferring that from one piece of evidence. The archive fixes it.
+It was worth far more than the voice work. Cross-referencing those connections against
+RetailGTM's 122 TAKE accounts found seven with a first-degree contact already in place —
+including three live threads that were dropped rather than rejected. See the watch board.
+
+A future export just goes in `voice/raw/` and `python3 voice/ingest.py --stats` again.
 
 ---
 

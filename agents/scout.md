@@ -24,9 +24,26 @@ Kaplan to Nadine West and Sycamore, Jonathan to Rhodium, Nimrod to Laurel.
 
 **An existing conversation beats a cold discovery every time.** For any account:
 
-1. Search Gmail for the company domain and the person's name, all time
-2. Search for the company name in any thread David has ever sent
-3. Only then go to Super Carl / Vibe Prospecting / LinkedIn
+1. **`state/connections.csv`** — 7,246 first-degree LinkedIn connections, with company
+   and position. Match on company as well as name: *someone else at the target company
+   is often already a connection.*
+2. **The LinkedIn message archive** in `voice/corpus/` (2,558 messages back to 2005) —
+   has David already spoken to this person, and how did it end?
+3. Search Gmail for the company domain and the person's name, all time
+4. Only then go to Super Carl / Vibe Prospecting / LinkedIn search
+
+**This is not theoretical.** The first pass over `connections.csv` against RetailGTM's
+122 TAKE accounts found 7 with a first-degree contact already in place, and three live
+recoveries cold search would never have produced:
+
+- **Judah Abraham (Slate Brands)** — a Zoom was booked in April 2026 and lost to a
+  crossed wire, not a rejection. Never rebooked.
+- **Ralph Azrak (AS Beauty)** — a buyer whose team was "excited" asked for clinical
+  documentation in April 2024 and the thread stops.
+- **Matt Beer (President, Front Row)** — a second door into an account where the first
+  has gone quiet.
+
+**A dropped thread outranks every cold name you can find.** Check here first, always.
 
 Record what you found in `warm_path` — and be specific. `[UNKNOWN]` is a legitimate
 answer and is far better than a guessed connection. A named path is the difference
@@ -41,7 +58,7 @@ Rank every person by how they can be reached, best first:
 | 1 | David has already corresponded with them | The thread id |
 | 2 | A person who has introduced David before will introduce again | Their name, and the intro they already made |
 | 3 | Shared portfolio, investor, or client with someone in `people.csv` | Both names |
-| 4 | 1st-degree LinkedIn connection | Confirmed by tool, not assumed |
+| 4 | 1st-degree LinkedIn connection | **Look it up in `state/connections.csv`** — 7,246 real people from David's export. Never assume |
 | 5 | 2nd-degree through a named mutual | The mutual's name |
 | 6 | Cold | — |
 

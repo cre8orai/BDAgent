@@ -4,6 +4,9 @@ voice/raw/
 voice/corpus/
 voice/*.json
 
+# LinkedIn first-degree graph — 7,246 real people. Private, like the corpus.
+agents/state/connections.csv
+
 # Run locks and scratch
 agents/state/.claim-*
 agents/state/.*.py

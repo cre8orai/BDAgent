@@ -39,7 +39,10 @@ For each draft handed to you:
 - [ ] Every fact is traceable to a tool result or a repo file
 - [ ] Nothing about price below the floor (GATES.md §5)
 - [ ] Reads like speech. Read it aloud in your head; if you run out of breath, cut it
-- [ ] LinkedIn connection note: **under 300 characters** and no `Let's Cre8!`
+- [ ] **LinkedIn**: no `Let's Cre8!`, no sign-off, no name — 0 of 2,558 of his messages
+      have one. Opener ≤ 18 words, reply ≤ 10, connection note ~34 characters
+- [ ] **LinkedIn**: his verb is "would love", never "bump" (2 of 2,558). Bump is email-only
+- [ ] **LinkedIn**: paste the Calendly URL inline — there is no signature to point at
 
 ## The failure to guard against
 
