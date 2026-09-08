@@ -10,7 +10,13 @@ DAVID  ──►  CHIEF  ──►  Scout · Ghost · Opener · Chaser · Desk �
               ▲                            │
               └──────── outbox.csv ◄───────┘   status=draft
                              │
-                    David approves ──► send.sh ──► Gmail / LinkedIn
+                    David approves (review.sh)
+                             │
+              draft.sh ──► a Gmail DRAFT sitting in his Gmail
+                             │
+                    he presses Send. or he doesn't.
+
+              bizdave.py ──► BizDave says "drafts waiting" 
 ```
 
 ## Start here
@@ -26,9 +32,10 @@ DAVID  ──►  CHIEF  ──►  Scout · Ghost · Opener · Chaser · Desk �
 ## The three commands
 
 ```bash
-bash agents/cycle.sh     # all six run. Drafts land in the outbox. Nothing goes out
-bash agents/review.sh    # read each draft — a to approve, k to kill
-bash agents/send.sh      # shows the plan, waits for you to type SEND
+bash agents/cycle.sh          # all six run. Drafts land in the outbox
+bash agents/review.sh         # read each draft — a to approve, k to kill
+bash agents/draft.sh          # approved rows become Gmail drafts. NOTHING IS SENT
+python3 agents/bizdave.py     # tell BizDave there are drafts waiting
 ```
 
 ## The six
@@ -46,13 +53,23 @@ bash agents/send.sh      # shows the plan, waits for you to type SEND
 
 ## The one rule
 
-**No agent has a send tool.** They write drafts and stop. `send.sh` is the only thing
-that transmits, it refuses to start without an interactive terminal, and it handles
-only rows David has marked `approved`. LinkedIn is additionally capped at 8 messages a
-session, 40–90 seconds apart, and any captcha stops the run instead of retrying it.
+**Nothing here sends. There is no send path in the repo at all.**
 
-Three reasons, in [`agents/GATES.md`](agents/GATES.md): domain reputation, LinkedIn's
-User Agreement, and the fact that it is David's name on every one of them.
+Agents write rows. Approved rows become **Gmail drafts** that sit in David's Gmail until
+he presses Send himself. LinkedIn is read-only to every agent — the archive and the
+connection graph are read, nothing is ever typed into linkedin.com, and LinkedIn drafts
+are listed for David to paste by hand.
+
+Enforced in three places: no script calls a send tool; the scheduled permission profile
+denies sending *and* drafting; the drafting profile allows `create_draft` and denies
+everything else. See [`agents/GATES.md`](agents/GATES.md).
+
+## It tells BizDave
+
+When drafts are waiting, `agents/bizdave.py` writes them into
+[bizDave](https://bizdave-personal-hub.lovable.app)'s own tables — `reply_radar_drafts`
+as `proposed`, a `pending_actions` notification, and high-priority `tasks` on Today. No
+new tables; BizDave already had the right ones.
 
 ## Related repos
 

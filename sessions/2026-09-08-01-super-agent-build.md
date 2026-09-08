@@ -91,3 +91,46 @@ the Gmail send tools — so it could never have worked. Split into two profiles.
 2. `bash agents/cycle.sh` for the first real run, then `review.sh`
 3. Install the four plists
 4. Drop the LinkedIn archive into `voice/raw/` and re-run `ingest.py`
+
+---
+
+## Amended the same day — the send path was removed entirely
+
+David: *"never send anything just create drafts, and notify me in BizDave.io my lovable
+that there are drafts waiting for review"*
+
+`agents/send.sh` is **deleted from the tree**, not disabled. What replaced it:
+
+- `agents/draft.sh` — approved rows become **Gmail drafts** sitting in his Gmail. There
+  is no flag or variable that makes it transmit.
+- `agents/bizdave.py` — emits the SQL that tells BizDave drafts are waiting.
+- `.claude/settings.send.json` deleted; `.claude/settings.draft.json` created, allowing
+  `create_draft` and denying everything that transmits. The scheduled profile now denies
+  `create_draft` too, so a scheduled agent writes CSV rows and nothing else.
+
+**LinkedIn is now read-only to every agent.** No browser automation at all — the Chrome
+site permission asked for in the first pass is no longer needed. The archive and
+`state/connections.csv` are read; nothing is typed into linkedin.com. LinkedIn drafts
+are listed for David to paste by hand. All the rate-limit machinery is moot and gone.
+
+## BizDave turned out to be far more built than its founding prompt
+
+It already had the right tables, so nothing new was invented:
+
+| Table | Used for |
+|---|---|
+| `reply_radar_drafts` | its own draft review queue. `status='proposed'` is "waiting on you" |
+| `pending_actions` | the notification inbox |
+| `tasks` | what surfaces on Today |
+
+All 8 drafts and 4 high-priority tasks were written to David's live BizDave
+(`user_id bb9fc520…`, `david@cre8orglobal.com`).
+
+One bug caught before it could bite: the first attempt put **company names in
+`from_email`**. BizDave can send from that table, and a company name in an address field
+is exactly how a draft misfires. Real addresses where known, synthetic
+`bdagent-…` thread ids and a `[LinkedIn — paste by hand]` subject where not.
+
+`agents/review.sh` also could never have run: it fed its Python through a heredoc, so
+stdin was the script and `input()` hit `EOFError` on the first keypress. Split into
+`agents/review.py`.

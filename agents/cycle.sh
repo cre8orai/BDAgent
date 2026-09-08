@@ -17,4 +17,6 @@ for r in rows[:10]:
     print(f"  [{r['id']}] {r['channel']:18} {r['person']} ({r['company']}) — {r['subject'][:50]}")
 PY
 echo
-echo "Review them, set status=approved on the ones you want, then: bash agents/send.sh"
+echo "Review them:   bash agents/review.sh"
+echo "Then draft:    bash agents/draft.sh   (Gmail drafts — nothing is sent)"
+echo "Tell BizDave:  python3 agents/bizdave.py"

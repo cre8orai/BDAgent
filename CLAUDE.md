@@ -46,20 +46,29 @@ Six agents live in `agents/`, each one David in a different mode. Before touchin
 of them read `agents/README.md` and then `agents/GATES.md` — the gates are load-bearing,
 not advisory.
 
-**The rule that governs everything here: no agent has a send tool.** Agents write rows
-to `agents/state/outbox.csv` with `status=draft` and stop. `agents/send.sh` is the only
-thing that transmits, it refuses to start without an interactive terminal, and it
-handles only rows David has marked `approved`. If you are asked to "just send this
-one", the answer is to write the row and tell him it is waiting.
+**The rule that governs everything here — David's words, 2026-09-08: _"never send
+anything just create drafts."_** There is no send path in this repo. `send.sh` was
+deleted, not disabled.
+
+Agents write rows to `agents/state/outbox.csv` and stop. `agents/review.sh` is where
+David approves them. `agents/draft.sh` turns approved rows into **Gmail drafts** that
+sit in his Gmail until he presses Send himself. `agents/bizdave.py` tells BizDave they
+are waiting.
+
+**LinkedIn is read-only to every agent.** Read the archive and `state/connections.csv`;
+never open linkedin.com, never click, never type. LinkedIn drafts are listed for David
+to paste by hand.
 
 Two permission profiles, and the difference matters:
 
-- `.claude/settings.json` — the **unattended** profile used by `run.sh`. Gmail's send
-  tools and the browser click tools are in its `deny` list.
-- `.claude/settings.send.json` — the **human-initiated** profile, used only by
-  `send.sh` after David types SEND.
+- `.claude/settings.json` — the **scheduled** profile used by `run.sh`. Denies the Gmail
+  send tools, the browser click tools, **and `create_draft`**. Scheduled agents write
+  CSV rows and nothing else.
+- `.claude/settings.draft.json` — used only by `draft.sh`. Allows `create_draft` and
+  denies everything that transmits.
 
-Never widen the first one to make a run easier.
+**Never widen either one, and never add a send path back.** If you are asked to "just
+send this one": write the row, run `draft.sh`, and tell him it is in his Gmail.
 
 ## David's voice — for anything sent in his name
 

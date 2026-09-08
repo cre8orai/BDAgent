@@ -2,8 +2,9 @@
 # Runs one BD agent unattended: claim -> pull -> run -> commit -> push -> release.
 # Usage: run.sh scout | ghost | opener | chaser | desk | closer | chief
 #
-# This script CANNOT send anything. Agents write drafts to state/outbox.csv and
-# stop. Transmission is send.sh, which a human starts. See GATES.md.
+# This script CANNOT send OR draft anything. Agents write rows to state/outbox.csv
+# and stop. Drafting is draft.sh, which a human starts, and which only ever creates
+# Gmail drafts. There is no send path anywhere in this repo. See GATES.md gate 1.
 set -uo pipefail
 AGENT="${1:-}"
 REPO="$HOME/GitHub/BDAgent"

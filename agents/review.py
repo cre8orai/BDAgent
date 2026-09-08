@@ -18,7 +18,7 @@ if not drafts:
     approved = sum(1 for r in rows if r["status"] == "approved")
     print("No drafts waiting.")
     if approved:
-        print(f"{approved} already approved — next:  bash agents/send.sh")
+        print(f"{approved} already approved — next:  bash agents/draft.sh")
     else:
         print("Generate some:  bash agents/cycle.sh")
     sys.exit()
@@ -61,4 +61,4 @@ n = sum(1 for r in rows if r["status"] == "approved")
 left = sum(1 for r in rows if r["status"] == "draft")
 print(f"\n{n} approved, {left} still waiting.")
 if n:
-    print("Next:  bash agents/send.sh")
+    print("Next:  bash agents/draft.sh   (creates Gmail drafts — nothing is sent)")

@@ -52,14 +52,19 @@ without David flipping a row to `approved`.
                                                                ▼
                                                     ┌──────────────────────┐
                                                     │  DAVID REVIEWS       │
+                                                    │  review.sh           │
                                                     │  draft → approved    │
                                                     │      or → killed     │
                                                     └──────────┬───────────┘
                                                                ▼
-                                            send.sh  ──► Gmail  /  LinkedIn in Chrome
+                                       draft.sh ──► a Gmail DRAFT in David's Gmail
+                                       (LinkedIn rows: listed for him to paste)
                                                                │
                                                                ▼
-                                                    status=sent, Chaser arms a cadence
+                                              HE presses Send. Nothing else does.
+                                                               │
+                                                               ▼
+                                       bizdave.py ──► BizDave: "drafts waiting" 
 ```
 
 ## The division that matters
@@ -95,7 +100,11 @@ agents/
   CHIEF.md          the orchestrator David talks to
   scout.md  ghost.md  opener.md  chaser.md  desk.md  closer.md
   run.sh            claim → pull → run → commit → push → release
-  send.sh           the ONLY thing that transmits. Foreground, human-initiated
+  review.sh         David approves or kills each draft
+  review.py         the prompt itself (a heredoc would occupy stdin)
+  draft.sh          approved rows -> Gmail drafts. NOTHING here transmits
+  draft_plan.py     what draft.sh would do, no side effects
+  bizdave.py        emits the SQL that tells BizDave drafts are waiting
   cycle.sh          one full pass
   com.cre8or.bd.*.plist
   state/
@@ -119,5 +128,8 @@ Inherited from the RetailGTM agent harness, which has run nightly since Sept 202
 - **Scoped commits.** `run.sh` stages `agents/` and nothing else.
 - **No invention.** Never a person, company, figure or prior conversation that did not
   come from a tool result. `[UNKNOWN]` over a silent guess.
-- **Nothing sends itself.** See [`GATES.md`](GATES.md). This is the property the whole
-  design exists to protect.
+- **Nothing sends. There is no send path.** `send.sh` was deleted on 2026-09-08 on
+  David's instruction — "never send anything just create drafts". Agents draft; he
+  presses Send. See [`GATES.md`](GATES.md) gate 1.
+- **LinkedIn is read-only.** Agents read the archive and `state/connections.csv`. No
+  agent opens linkedin.com, clicks, or types.

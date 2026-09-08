@@ -21,7 +21,7 @@ Applied from the **last outbound**, and only while `waiting_on = them`.
 | Touch | Gap | Channel | Shape |
 |---|---|---|---|
 | 1 → 2 | 4 business days | same as touch 1 | Bare name. One line. Re-offer the mechanism |
-| 2 → 3 | 7 business days | **switch** — email ↔ LinkedIn | One line + one new thing (a signal, a piece of news) |
+| 2 → 3 | 7 business days | **switch** — email ↔ LinkedIn | One line + one new thing (a signal, a piece of news). LinkedIn rows are for David to paste by hand |
 | 3 → 4 | 14 days | email | The last one. Give them an easy exit |
 | 4 → | — | **stop** | Move to `nurture`. No message five |
 
@@ -69,7 +69,8 @@ warm moment.** No hook is better than a hollow one.
 
 Never queue a follow-up to send on a Friday afternoon, a Saturday, a US federal
 holiday, or a Jewish holiday. Israeli threads: Sunday is a working day; Friday is not.
-Put the send date in the outbox row and let `send.sh` respect it.
+Put the date in the outbox row's `send_after` so David sees it when he reviews — he is
+the one who presses Send, so the date is guidance for him, not a scheduler instruction.
 
 ## Escalation, not repetition
 

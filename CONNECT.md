@@ -1,13 +1,16 @@
 # Turning it on
 
-Everything in this repo is inert until three connections exist. Two of them already
-do. This page is the checklist and the honest status of each.
+Everything in this repo is inert until its connections exist. Most already do.
+
+**Read this first: nothing here sends anything.** Agents draft; you press Send. The
+send capability was removed from the repo on 2026-09-08, not merely disabled.
 
 | | What it does | Status |
 |---|---|---|
 | **Gmail** | Reads the inbox, drafts, replies, sends as `david@cre8orglobal.com` | 🟢 **Already connected** |
 | **GitHub** | Versions state so Mac and cloud runs can't duplicate each other | 🟢 **Already working** (SSH, as `cre8orai`) |
-| **LinkedIn** | Reads profiles, sends messages and invites in Chrome | 🟡 **Needs one setting** — below |
+| **LinkedIn** | Archive + 7,246-connection graph, read-only | 🟢 **Ingested.** No browser automation, none needed |
+| **BizDave** | Tells you drafts are waiting | 🟢 **Wired** — writes to its own tables |
 | **Schedules** | Runs the agents while you sleep | ⚪ Ready to install, not installed |
 
 ---
@@ -24,9 +27,9 @@ The connector exposes both halves:
 Desk runs on. It sweeps `in:inbox newer_than:3d`, classifies every thread, and pulls
 out the promises you made in your own words.
 
-**Sending as you** — `send_message`, `reply`, `create_draft`. Mail goes out from
-`david@cre8orglobal.com`, on the real thread, with your signature. Not a relay, not a
-different address, not a "sent via" footer. To the recipient it is you, because it is.
+**Drafting as you** — `create_draft`. A real Gmail draft, on the right thread, from
+`david@cre8orglobal.com`, with your signature. It appears in your Gmail like anything
+you started typing yourself. **The send tools are denied to every profile in this repo.**
 
 **How you tell it's working:**
 
@@ -36,96 +39,57 @@ claude -p "Using Gmail, how many threads in my inbox from the last 3 days are wa
 
 If that returns real threads, everything Desk needs is live.
 
-### The thing to understand about sending
+### Nothing sends, and there is no way to make it send
 
-The connector *can* send unattended. **This repo deliberately does not let it.**
-`run.sh` tells every agent it has no send tool, and the only script that transmits is
-`send.sh`, which refuses to start without an interactive terminal:
+The connector *can* send. **Nothing in this repo is allowed to reach that.** Per your
+instruction on 2026-09-08, the capability was removed rather than guarded — `send.sh` is
+deleted from the tree, not disabled.
 
-```bash
-if [ ! -t 0 ]; then echo "REFUSING: needs an interactive terminal."; exit 3; fi
-```
+Enforced in three places, so removing one does not open a hole:
 
-That is a real guard, not a comment. See [`agents/GATES.md`](agents/GATES.md) for the
-three reasons — domain reputation, LinkedIn's terms, and the fact that it is your name
-on it.
+1. **The tree.** No script here calls a send tool.
+2. **`.claude/settings.json`** — the scheduled profile. Denies send, reply, forward,
+   every browser click tool, *and* `create_draft`. A scheduled agent writes CSV and stops.
+3. **`.claude/settings.draft.json`** — used only by `draft.sh`. Allows `create_draft`,
+   denies everything that transmits.
 
 ### Your daily loop, end to end
 
 ```bash
-bash agents/cycle.sh     # all six agents run. Drafts land in the outbox. Nothing goes out.
-bash agents/review.sh    # read each draft, press a to approve, k to kill
-bash agents/send.sh      # shows the plan, waits for you to type SEND, then transmits
+bash agents/cycle.sh          # all six agents run. Rows land in the outbox
+bash agents/review.sh         # read each one — a to approve, k to kill
+bash agents/draft.sh          # approved rows become Gmail drafts. NOTHING IS SENT
+python3 agents/bizdave.py     # tell BizDave there are drafts waiting
 ```
 
-Three commands. The middle one is the whole design.
+You press Send in Gmail. That is the only place a message leaves.
 
 ---
 
-## 2 · LinkedIn — one setting, then it works
+## 2 · LinkedIn — read-only, and staying that way
 
-LinkedIn has no API for this. The agents drive **the Chrome you are already logged
-into**, so there are no credentials in this repo and nothing to store. Claude clicks
-the same buttons you would.
+**No agent opens linkedin.com.** Nothing clicks, nothing types, nothing logs in. The
+Chrome permission I asked you for in the first pass is **not needed** — don't bother
+adding it.
 
-### The setting
-
-Claude's Chrome extension needs permission for `linkedin.com`:
-
-1. Open the Claude extension in Chrome → **Settings → Site permissions**
-2. Add `linkedin.com`
-3. Make sure you are logged into LinkedIn in that Chrome profile
-
-Then check it:
-
-```bash
-claude -p "Open linkedin.com in a new tab and tell me whose account is logged in. Don't click anything else."
-```
-
-### If you use Brave instead
-
-Per your existing setup, Brave is driven over CDP and must be launched with the
-debugging port open:
-
-```bash
-open -a "Brave Browser" --args --remote-debugging-port=9222
-```
-
-### The rules the code enforces
-
-Not suggestions — [`agents/send.sh`](agents/send.sh) counts these, because a prompt
-cannot be trusted to.
+What the agents actually use is your export, already ingested and sitting on this
+machine:
 
 | | |
 |---|---|
-| Messages per session | 8 |
-| Gap between them | 40–90 seconds, randomised |
-| Sessions per day | 1 |
-| Connection requests per week | 20 |
-| Any captcha or checkpoint | **stop the run, don't retry, tell David** |
+| 2,558 of your LinkedIn messages | rewrote `voice/STYLE.md` §12 from evidence |
+| 38 connection notes | your real median is 34 characters, not the 300 limit |
+| **7,246 connections** | `agents/state/connections.csv` — Scout's warm-path graph |
 
-**Why the caution is not excessive.** LinkedIn's User Agreement §8.2 prohibits
-automated messaging, and enforcement is account restriction. Your LinkedIn is a
-20-year asset and most of the warm paths in `agents/state/people.csv` run through it.
-Losing it would cost more than anything a campaign could earn. Hand-paced and approved
-is not a limitation here — it is the only version worth building.
+That graph is what found Judah Abraham, Ralph Azrak and Matt Beer — three live threads
+that had been dropped rather than rejected, inside accounts RetailGTM had already scored
+TAKE. Reading the archive turned out to be worth far more than automating the site ever
+would have been.
 
-### Your archive — done
+LinkedIn has no draft API, so LinkedIn messages stay in `outbox.csv` and in BizDave
+marked `[LinkedIn — paste by hand]`. You copy them across yourself.
 
-Ingested 2026-09-08 from `Basic_LinkedInDataExport_09-07-2026`. It gave four things:
-
-| | |
-|---|---|
-| **2,558 LinkedIn messages** you sent, 2005–2026 | Rewrote `voice/STYLE.md` §12 from evidence — it is no longer `[ASSUMPTION]` |
-| **38 connection notes** | Your real median is **34 characters**, not the 300 limit |
-| **7,246 connections** | `agents/state/connections.csv` — Scout's first-degree graph |
-| **Confirmation** | `Let's Cre8!` appears **0 times** in 2,558 LinkedIn messages. The email close does not belong there |
-
-It was worth far more than the voice work. Cross-referencing those connections against
-RetailGTM's 122 TAKE accounts found seven with a first-degree contact already in place —
-including three live threads that were dropped rather than rejected. See the watch board.
-
-A future export just goes in `voice/raw/` and `python3 voice/ingest.py --stats` again.
+A newer export just goes in `voice/raw/`, then `python3 voice/ingest.py --stats`.
 
 ---
 
@@ -159,8 +123,8 @@ launchctl load ~/Library/LaunchAgents/com.cre8or.bd.chief.plist
 | Scout | 02:30 Mon/Thu | Twice a week is enough; quality over volume |
 | Chief | 06:30 daily | Writes the brief last, once the others have finished |
 
-**Nothing scheduled can send.** `send.sh` is not in any plist and refuses to run
-without a terminal.
+**Nothing scheduled can send or even draft.** `draft.sh` is not in any plist, and the
+scheduled permission profile denies `create_draft` outright.
 
 Stop them:
 
@@ -207,12 +171,13 @@ None of these block anything. Say the word on any of them.
 
 ```bash
 # once
-#   add linkedin.com to the Claude Chrome extension's site permissions
 cp ~/GitHub/BDAgent/agents/com.cre8or.bd.*.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.cre8or.bd.*.plist
 
-# every morning
-open ~/GitHub/BDAgent/pipeline.html   # or the published artifact
-bash agents/review.sh                 # a / k on each draft
-bash agents/send.sh                   # type SEND
+# every morning — or just open BizDave, which now tells you
+bash agents/review.sh         # a / k on each draft
+bash agents/draft.sh          # they appear as Gmail drafts
+python3 agents/bizdave.py     # push the notification to BizDave
 ```
+
+Nothing in that list sends anything. You press Send in Gmail.
