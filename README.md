@@ -115,3 +115,22 @@ new tables; BizDave already had the right ones.
 - Status: 🟢 done · 🟡 in progress · ⚪ not started · 🔴 blocked
 
 See [`CLAUDE.md`](CLAUDE.md) for how AI sessions work here.
+
+## This repository feeds the shared evidence base
+
+`cre8orai/RetailGTM/agents/build_evidence.py` harvests **every markdown file in this repo** —
+root, `agents/`, `docs/`, `voice/`, `sessions/` — into the published Evidence Base, alongside
+RetailGTM's own docs and the live qualified pipeline. Each row is cited back to
+`BDAgent/<file>:<line>`.
+
+**So anything you write into a markdown table here can end up on a page David shares with
+colleagues.** Write accordingly.
+
+**`agents/state/*.csv` are deliberately excluded and must stay excluded.** They hold named
+individuals, correspondence counts, warm-path data and draft outbound — none of which belongs
+on a shared page. The exclusion is enforced in the generator's file globs, not by a filter, so
+adding a new state file is safe by default; adding a new *markdown* file is not.
+
+The three published views: **Strategy brief**, **Pipeline**, **Evidence base** — all three
+cross-link to each other and are regenerated on every agent run, so the pages and both
+repositories cannot drift.
