@@ -52,6 +52,27 @@ for:
   they were visible; it was wrong. Brief: show the first line, red-rail the flagged ones.
 - H1 sizes ranged from 2xl to 4xl across pages; standardised.
 
+**Build turn 1 landed** — commit `9b41b9c5`, 14.6 credits, 21 files. Audited the diff by
+script rather than by reading the agent's summary: no new `aiEnabled` gating (the only two
+lines are the pre-existing dormant cards, moved), no send path, no tailwind palette
+colours, no shadows, no dependency change; the deals-query fix, the shared triage hook and
+the red-railed audit flags are all present. It skipped one thing on purpose: the Gmail
+invite badges (Accepted / Declined / Tentative) keep their own colours as a legend. Fair.
+
+**Then David raised the bar** — *"It really needs to look professional like a Salesforce
+type of an environment or even HubSpot… Layout graphics. Increase usage."* Read as: spend
+what it takes. Wrote `docs/bizdave-crm-layout-brief.md` (top bar with breadcrumb and
+global search, hand-rolled data tables with sort and paging, pipeline board by channel,
+KPI tiles with sparklines and four charts on Overview, three-column record pages,
+Prospecting as a segment table) and sent it as turn 2, `umsg_01m2t5q4bmf1kbm50ssx4mbmd9`.
+recharts and shadcn Table were already installed, so no new dependency.
+
+**Turn 2 paused at 20 credits with `awaiting_input`** after the agent had built the shell,
+primitives, Today, Deals, Overview, Contacts and Companies and was running the typecheck
+(`bunx tsgo --noEmit`). Partial work is committed as `5b2ba1d0`. The pause is a decision
+only David can answer in the Lovable editor — almost certainly the spend check-in.
+Record pages and Prospecting were still in flight.
+
 ## Decided
 
 - Do not delete the 509 vibe duplicates of Channel Brief contacts. The channel-brief row
