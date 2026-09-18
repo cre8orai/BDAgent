@@ -7,6 +7,9 @@ voice/*.json
 # LinkedIn first-degree graph — 7,246 real people. Private, like the corpus.
 agents/state/connections.csv
 
+# Machine-local permission grants. Interactive only, never used by a script.
+.claude/settings.local.json
+
 # Run locks and scratch
 agents/state/.claim-*
 agents/state/.*.py

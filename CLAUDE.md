@@ -67,8 +67,20 @@ Two permission profiles, and the difference matters:
 - `.claude/settings.draft.json` — used only by `draft.sh`. Allows `create_draft` and
   denies everything that transmits.
 
-**Never widen either one, and never add a send path back.** If you are asked to "just
+A third file, `.claude/settings.local.json`, is the **interactive** profile — David is at
+the keyboard. It exists only to stop permission prompts on read-only inspection tools and
+is used by no script. It is gitignored, so it is a machine-local convenience rather than a
+repo decision. `mcp__Lovable__query_database` is deliberately absent from it: that tool can
+INSERT and DELETE against the live bizDave database, and a write to his production CRM
+should cost one click.
+
+**Never widen any of them, and never add a send path back.** If you are asked to "just
 send this one": write the row, run `draft.sh`, and tell him it is in his Gmail.
+
+**A note for web sessions.** The MCP tool names differ by surface. Locally they are
+`mcp__claude_ai_Gmail__*`; in a Claude Code web session the same tools are
+`mcp__Gmail__*`. A rule written for one prefix silently matches nothing under the other,
+which reads as "my allow list is being ignored". It is not — it is a different name.
 
 ## David's voice — for anything sent in his name
 
