@@ -1,105 +1,101 @@
-# bizDave build brief — the review surface
+# bizDave build brief — the tracker
 
-Paste the block below into the Lovable chat for
+One message to paste into the Lovable chat for
 [bizDave](https://lovable.dev/projects/425cdf7c-3348-45f2-a9f7-4176a0a1c808).
 
-It is one message, deliberately. Lovable charges per agent turn, so a complete brief
-that lands in one pass costs less than five rounds of refinement.
+One message is deliberate. Lovable charges per agent turn, so a complete brief that
+lands in one pass costs less than five rounds of refinement. **This is where David's
+credits actually go** — the running app costs nothing.
 
-## Why this and not something else
+## What changed, and why this brief replaces the last one
 
-`GATES.md` gate 4 says never ask David in a terminal, because a question asked there is
-a question never answered. But `agents/review.sh` **is** a terminal. That contradiction
-is why twelve drafts sat at `proposed` for ten days.
+David, 2026-09-18: *"BizDave is not supposed to be something that burns through all of
+my credits. This is just something to help me stay on track. I don't need to draft
+emails for me — I'll do that all individually."*
 
-Two specific things are missing in the app, both verified against the live code and
-database on 2026-09-18:
+So the draft-review surface briefed earlier is **cancelled**. `reply_radar_drafts` is
+legacy; nothing should be built for it.
 
-1. **`reply_radar_drafts.draft_subject` and `draft_body` are never displayed.**
-   `ReplyRadarCard` in `src/routes/_authenticated/today.tsx` renders `from_name`,
-   `subject`, `snippet` and `reason`, and offers exactly two actions — "Reply in Gmail"
-   (an outbound link) and "Dismiss". The draft written in David's voice is invisible.
-2. **`pending_actions` has no UI anywhere.** There is no `pending-actions` module in
-   `src/lib/` and no reference in `today.tsx`. Rows written there — including every
-   question an agent needs David to answer — are never seen by anyone.
+## The finding that makes this cheap
 
-The card is also gated behind `googleConnected && aiEnabled`, so if either flag drops,
-the queue disappears rather than degrading.
+`user_settings.ai_enabled` has been **false** since 2026-08-15, and `ai_provider_status`
+was last checked the same afternoon. **bizDave has not made a model call in a month.**
+It is not burning credits at runtime, and it should never start.
 
-## The gate this must not break
+That also explains the frozen queue: `ReplyRadarCard` renders only when
+`googleConnected && aiEnabled`, so with AI off it never drew. The twelve drafts were not
+ignored — they were invisible. Which no longer matters, because drafting is out.
 
-**Approve means `status='approved'`. It must never send.** `draft.sh` turns approved
-rows into Gmail drafts that wait in David's Gmail until he presses Send himself. If the
-build adds a Send button, it has broken the rule the whole system rests on — see
-`agents/GATES.md` gate 1.
+**The rule this sets: every number on every screen comes from a SQL query, never a
+model.** A view that groups, sorts, counts and flags is free and runs forever. A model
+call costs on every page load. Nothing below needs AI.
 
 ---
 
 ## The message to paste
 
-> Two changes to the Today screen. Both are read/write against tables that already
-> exist — no new tables, no migrations, no new integrations.
+> Three changes. All are plain database reads against tables that already exist — no new
+> tables, no migrations, no integrations, and **no AI calls of any kind**. `ai_enabled`
+> is false and stays false, so nothing may be gated behind it or depend on it.
 >
-> **1. Make Reply Radar a draft review queue.**
+> **1. Rebuild the top of the Today screen as three columns: Late / You / Them.**
 >
-> `ReplyRadarCard` in `src/routes/_authenticated/today.tsx` currently shows only the
-> sender, subject and snippet. The `reply_radar_drafts` table also holds `draft_subject`
-> and `draft_body` — a reply already composed — and those are never shown.
+> Scope every query to the signed-in `user_id`.
 >
-> For any row where `draft_body` is not null, show the draft body in a collapsible block
-> (collapsed to about four lines, expandable), and add three actions:
+> - **Late** — `tasks` where `status='todo'` and `due_date < current_date`, plus `deals`
+>   where `status='open'` and `next_step_date < current_date`. Sort oldest first and show
+>   how many days over, as a red badge reading e.g. "11 days late".
+> - **Waiting on you** — `deals` where `status='open'` and `waiting_until` is null and
+>   `next_step_date >= current_date`. These are his move.
+> - **Waiting on them** — `deals` where `status='open'` and `waiting_until >= current_date`.
+>   Show the date. He is not blocked on these; they are here so nothing goes quiet.
 >
-> - **Approve** — sets `status = 'approved'`. Nothing else. After it saves, show a toast
->   reading "Approved. Run draft.sh to put it in your Gmail." **Do not send the email, do
->   not call Gmail, do not add a Send button anywhere.** An external script turns approved
->   rows into Gmail drafts that wait for him to press Send. This is a hard rule.
-> - **Edit** — opens the `draft_body` and `draft_subject` in a textarea, saves back to the
->   same row, leaves `status` at `proposed`.
-> - **Kill** — sets `status = 'dismissed'` (keep the existing Dismiss behaviour).
+> Each row shows the deal or task title, the company, and `next_step` (or the task
+> description's first line), and links to the deal detail page. Keep rows to two lines.
+> The whole point is that he can read this in ten seconds and know what today is.
 >
-> Keep "Reply in Gmail" for rows that have no `draft_body`.
->
-> If `reason` starts with "BDAgent", show it as a small muted badge so he can see the
-> draft came from the agent rather than the inbox scan. A row whose `subject` begins
-> "[LinkedIn" cannot be emailed — for those, replace Approve with a **Copy** button that
-> copies `draft_body` to the clipboard, and label it "Paste into LinkedIn yourself".
->
-> Finally, this card is currently rendered only when `googleConnected && aiEnabled`.
-> Change it so the card still renders when there are rows with a `draft_body`, even if
-> those flags are false — the drafts come from outside the app and do not depend on
-> either. Show the existing empty state when there is genuinely nothing.
->
-> **2. Add a "Needs you" card above Reply Radar.**
+> **2. Add a "Needs you" card directly under that.**
 >
 > Nothing in the app reads `pending_actions`, so rows written there are invisible.
 >
-> Add a card listing `pending_actions` where `status = 'pending'` and `expires_at` is in
-> the future, newest first, scoped to the signed-in user. For each row show `summary`,
-> and a small muted line with `payload->>'agent'` when present.
+> List `pending_actions` where `status='pending'` and `expires_at` is in the future,
+> newest first, scoped to the user. Show `summary`, plus a small muted line with
+> `payload->>'agent'` when present.
 >
 > Each row gets a textarea and a **Save answer** button. Saving writes the text into
-> `payload` as an `answer` key, sets `answered_at` to now inside the same payload, and
-> sets `status = 'done'`. Nothing is sent and no email is generated — the answer is read
-> back from the database by an external agent.
+> `payload` under an `answer` key, sets an `answered_at` key inside the same payload, and
+> sets `status='done'`. No email, no generation — the answer is read back from the
+> database by an external process. Title it "Needs you" with a count badge. Empty state:
+> "Nothing waiting on your decision."
 >
-> Title the card "Needs you" with a count badge. Empty state: "Nothing waiting on your
-> decision." Give it the same visual weight as Reply Radar — these are the questions
-> blocking work.
+> **3. Add a Channels card to the Deals page.**
 >
-> Match the existing card, badge and button styling exactly. Do not restyle anything else
-> on the page, and do not touch any other route.
+> `deals.source` carries the go-to-market channel after the colon — values look like
+> `BDAgent:brand-operator`, `BDAgent:investor`, `BDAgent:beauty-platform`,
+> `BDAgent:creator-platform`. Treat the part after the colon as the channel, and group
+> anything without one as "Direct".
+>
+> For each channel show: number of open deals, how many are late (`next_step_date <
+> current_date`), and the date of the oldest `last_activity_at`. Sort by open deals
+> descending. Clicking a channel filters the deals list to it.
+>
+> This is the only GTM view he needs in the app: which motion is actually moving, and
+> which has gone quiet. Do not add charts, forecasts, weighted values or projections —
+> deal values are deliberately empty and must not be estimated or defaulted.
+>
+> **Constraints for all three:** match existing card, badge and button styling exactly;
+> do not restyle anything else; do not touch other routes; do not add any AI, model,
+> summarisation or "ask" feature; do not add a Send button anywhere.
 
 ---
 
 ## After it builds
 
-Check three things before trusting it:
+1. The three columns reconcile with the database — Nate Cooper's materials should show
+   as the oldest late item.
+2. An answer saved under "Needs you" comes back in `payload->>'answer'`.
+3. The Channels card totals match the number of open deals.
 
-1. The twelve rows at `status='proposed'` appear with their draft text visible.
-2. Approve changes the status and **no mail leaves**. Confirm the Gmail Sent folder is
-   untouched.
-3. The four questions appear under "Needs you", and an answer written there comes back in
-   `payload->>'answer'`.
-
-Then update `agents/review.sh` to point at the app rather than the terminal, and record
-the change in `sessions/`.
+Then: **stop sending build messages.** The app is a tracker. New information arrives by
+`agents/sync_bizdave.py` writing rows, which costs nothing. A build message should only
+ever be needed when the *shape* of the screen is wrong, not when the data changes.
