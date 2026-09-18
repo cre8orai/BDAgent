@@ -34,20 +34,37 @@ src as (
 select user_id, dom, co from src
 where dom <> '' and dom like '%.%' and dom not in (select d from free);
 
--- One canonical name per domain: the one the most records already agree on, with the
--- shortest spelling winning a tie ("Front Row Group" over "Front Row Group, LLC.").
+-- One canonical name per domain: the one the most records already agree on.
+--
+-- Generic legal and role tokens are thrown out first. This is not hypothetical —
+-- all thirteen contacts at erman.co.il carry the company name "Co", and nine at
+-- export.gov.il carry "Gov", both almost certainly the wreckage of an earlier
+-- import that split a domain on the dot. Taking the majority answer without this
+-- filter names the account "Co".
+--
+-- Ties break toward the LONGER spelling. A truncated name loses information that a
+-- verbose one merely repeats, so "Front Row Group, LLC." beats "Front".
 create temp table _name on commit drop as
+with stop(w) as (values
+  ('co'),('inc'),('ltd'),('llc'),('gov'),('com'),('corp'),('group'),('the'),('and'),
+  ('plc'),('gmbh'),('sa'),('bv'),('ag'),('srl'),('pty'),('limited'),('company'),
+  ('org'),('net'),('info'),('mail'),('email'),('team'),('office'),('admin'))
 select user_id, dom, co from (
   select user_id, dom, co,
-         row_number() over (partition by user_id, dom order by count(*) desc, length(co), co) rn
-  from _dom where co is not null group by user_id, dom, co
+         row_number() over (partition by user_id, dom order by count(*) desc, length(co) desc, co) rn
+  from _dom
+  where co is not null and length(co) >= 3 and lower(co) not in (select w from stop)
+  group by user_id, dom, co
 ) r where rn = 1;
 
--- A domain nobody has ever named becomes a company named after the domain itself.
--- That is honest and obviously machine-made, which is the point — it reads as
--- something to tidy, not as a fact David asserted.
+-- A domain nobody has usefully named becomes a company named after the domain's
+-- first label — erman.co.il becomes "Erman". That is honest and obviously
+-- machine-made, which is the point: it reads as something to tidy, not as a fact
+-- David asserted.
 insert into companies (user_id, name, domain, website, notes, created_at, updated_at)
-select d.user_id, coalesce(n.co, d.dom), d.dom, 'https://'||d.dom,
+select d.user_id,
+       coalesce(n.co, initcap(replace(split_part(d.dom,'.',1),'-',' '))),
+       d.dom, 'https://'||d.dom,
        case when n.co is null
             then '[BDAgent] No company name on record — named from the email domain.'
             else '[BDAgent] Matched from email domain.' end,
