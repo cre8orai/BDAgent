@@ -26,6 +26,9 @@ echo "Tell BizDave:  python3 agents/bizdave.py"
 # database write. Without BIZDAVE_DB_URL it prints the SQL and changes nothing.
 if [ -n "${BIZDAVE_DB_URL:-}" ]; then
   python3 sync_bizdave.py --execute && echo "bizDave pipeline updated."
+  psql "$BIZDAVE_DB_URL" -q -f link_companies.sql && echo "bizDave companies linked."
 else
-  echo "Sync bizDave: export BIZDAVE_DB_URL, then  python3 agents/sync_bizdave.py --execute"
+  echo "Sync bizDave: export BIZDAVE_DB_URL, then"
+  echo "               python3 agents/sync_bizdave.py --execute"
+  echo "               psql \"\$BIZDAVE_DB_URL\" -f agents/link_companies.sql"
 fi
