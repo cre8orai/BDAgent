@@ -20,3 +20,12 @@ echo
 echo "Review them:   bash agents/review.sh"
 echo "Then draft:    bash agents/draft.sh   (Gmail drafts — nothing is sent)"
 echo "Tell BizDave:  python3 agents/bizdave.py"
+
+# Push the pipeline itself into bizDave — deals, contacts, activities, commitments
+# and open questions. Costs no Lovable credits and no model tokens: it is a plain
+# database write. Without BIZDAVE_DB_URL it prints the SQL and changes nothing.
+if [ -n "${BIZDAVE_DB_URL:-}" ]; then
+  python3 sync_bizdave.py --execute && echo "bizDave pipeline updated."
+else
+  echo "Sync bizDave: export BIZDAVE_DB_URL, then  python3 agents/sync_bizdave.py --execute"
+fi
