@@ -88,15 +88,59 @@ Two constraints in the app shaped the mapping, both worth knowing for future ses
 verbatim in the notes instead), and `contacts.source` accepts only `manual` or
 `gmail_import`.
 
+## Later the same day — the tracker turn
+
+David: *"BizDave is not supposed to be something that burns through all of my credits.
+This is just something to help me stay on track. I don't need to draft emails for me."*
+
+So the draft-review work is cancelled and `reply_radar_drafts` is legacy. The finding
+that settles the credit question: **`user_settings.ai_enabled` has been `false` since
+2026-08-15**, and `ai_provider_status` was last checked the same afternoon. bizDave has
+not made a model call in a month. **It is not burning credits at runtime — the spend is
+Lovable chat turns.** That also explains the frozen queue: `ReplyRadarCard` renders only
+when `googleConnected && aiEnabled`, so with AI off it never drew. The drafts were never
+ignored; they were invisible.
+
+**Leads reconciled.** Correction to a number stated earlier in this file: 2,107 leads
+have no email address, not 540 — the 540 was leads missing *both* company and email.
+Matching the no-email leads against contacts by name and LinkedIn URL linked **41** of
+them via `leads.contact_id`. The overlap is small, which is itself the answer: these are
+genuinely new names, not duplicates of people David knows.
+
+**The GTM picture, which was already in the app and nobody had read.** All 4,193 leads
+were already segmented into 15 `prospect_segments`. The reachability split is the
+finding:
+
+| | Leads | Email | Reading |
+|---|---|---|---|
+| Indie and DTC beauty brands, US | 1,567 | **0** | Largest, most on-strategy, entirely LinkedIn-only |
+| Israel beauty directors and VPs | 1,000 | 1,000 | Largest immediately workable list |
+| Israel beauty founders | 500 | **0** | LinkedIn-only |
+| US cosmetics manufacturers | 300 | 300 | Competitors or partners — decide which |
+| Founders / BD partnerships | 40 | 0 | **All 40 already Contacts.** Warmest list here |
+| 6 others | 786 | 786 | Workable |
+| 4 starter templates | 0 | — | Never populated |
+
+**2,086 reachable by email; 2,107 reachable only through LinkedIn** — which is read-only
+to every agent by Gate 2. Half the prospect list cannot be worked through any automated
+path at all, and the half that cannot includes the segment closest to Cre8or's core
+offer. That is a strategy question for David, not a tooling one.
+
+Each segment now carries this reading in its `notes`, so it is visible on the
+Prospecting screen rather than living only in this file.
+
 ## Next
 
 1. **David: the four questions and five overdue commitments are in bizDave now.** Nate
    Cooper's materials are 11 days late and Avery Schwartz started without an address.
 2. Set `BIZDAVE_DB_URL` (the Supabase connection string) so `cycle.sh` runs the sync
    unattended. Until then it prints SQL and changes nothing.
-3. Collapse the two inbox queues into one — the duplicated classification is the real
-   token cost.
-4. Approve/Kill/Edit and an answer box in bizDave, so `review.sh` stops being the gate
-   that contradicts Gate 4.
+3. Build the three tracker cards — see `docs/bizdave-build-brief.md`. Blocked here:
+   `mcp__Lovable__send_message` was unavailable for most of this session, and it is the
+   only way to change the app's code. The brief is one paste-ready message.
+4. `[OPEN]` The US indie/DTC list — 1,567 names, no emails, and the best fit for the
+   product. Source addresses, or accept it as a hand-worked motion?
+5. `[OPEN]` `promoteLead` writes `probability: 10` onto every new deal. That is an
+   invented number reaching a screen David reads. Worth removing.
 
 Nothing was sent. Gate 1 untouched.
