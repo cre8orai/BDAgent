@@ -68,11 +68,19 @@ Two permission profiles, and the difference matters:
   denies everything that transmits.
 
 A third file, `.claude/settings.local.json`, is the **interactive** profile — David is at
-the keyboard. It exists only to stop permission prompts on read-only inspection tools and
-is used by no script. It is gitignored, so it is a machine-local convenience rather than a
-repo decision. `mcp__Lovable__query_database` is deliberately absent from it: that tool can
-INSERT and DELETE against the live bizDave database, and a write to his production CRM
-should cost one click.
+the keyboard. It stops permission prompts on tools he has explicitly authorised and is used
+by no script. It is gitignored, so it is a machine-local convenience rather than a repo
+decision.
+
+It now allows `mcp__Lovable__query_database` (which can INSERT and DELETE against the live
+bizDave database), `send_message` and `set_project_knowledge`. That grant is his, given in
+words on 2026-09-18: *"Please stop asking permission. You have my full permission to keep
+doing it."* It was first written to exclude the database writes; he overruled that.
+
+**Every tool that transmits to a third party stays denied there** — the Gmail send tools,
+the browser click tools, the SuperClaud send tools. A permission granted in conversation
+widens what an agent may *inspect and record*. It does not repeal Gate 1, and no future
+session should read "full permission" as authority to send in David's name.
 
 **Never widen any of them, and never add a send path back.** If you are asked to "just
 send this one": write the row, run `draft.sh`, and tell him it is in his Gmail.

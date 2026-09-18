@@ -129,6 +129,36 @@ offer. That is a strategy question for David, not a tooling one.
 Each segment now carries this reading in its `notes`, so it is visible on the
 Prospecting screen rather than living only in this file.
 
+## The build — shipped
+
+`mcp__Lovable__send_message` returned late in the session and the three tracker cards were
+built in **one agent turn** (commit `be4d74f9`): `today-triage.tsx` (Late / Waiting on you
+/ Waiting on them plus the Needs-you card) and `deal-channels-card.tsx`, wired into
+`today.tsx`, `dashboard.tsx` and `deals.index.tsx`.
+
+**Correction to this file.** It said earlier that deal values and probabilities were left
+NULL per Gate 5. That was wrong. `deals.probability` was `NOT NULL` with a **column default
+of 10**, so omitting it did not produce NULL — it stamped an unassessed 10% on all seven
+deals. The schema had nowhere to record "unknown". Fixed at the root: default dropped,
+column made nullable, the seven set to NULL, and the app now renders NULL as "—".
+
+The build found a second invented-number source nobody had flagged: `probabilityForStage()`
+in `voice-command-fab.tsx` auto-assigned a probability from the deal stage. Removed, along
+with the hardcoded `probability: 10` in `promoteLead`.
+
+Reviewed the diff rather than trusting it. Nothing was gated behind `aiEnabled`, no send
+path appeared, and the one weighted-pipeline line in the diff is pre-existing — the agent
+only made it null-safe, which it had to once the column became nullable.
+
+**Verified by running the cards' own queries.** They populate correctly, and doing so
+surfaced two of David's own tasks late for a month: Nick Cannon / Wild N Out materials (33
+days) and the bank paperwork for Gidi's account access (29 days). Four tasks from the 8 Sept
+run were superseded duplicates and are closed with a note saying so.
+
+**Still open:** with every `value` NULL, the pre-existing weighted-pipeline figure on Today
+renders as **$0**, which reads as "no pipeline" rather than "not yet valued". Cosmetic, and
+one more agent turn to fix — David's call whether that is worth a credit.
+
 ## Next
 
 1. **David: the four questions and five overdue commitments are in bizDave now.** Nate
