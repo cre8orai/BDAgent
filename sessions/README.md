@@ -8,6 +8,7 @@ Name files `YYYY-MM-DD-NN-short-slug.md`.
 
 | Date | Session | Focus | Outcome |
 |---|---|---|---|
+| 2026-09-18 | [02](2026-09-18-02-channel-brief-load-and-app-review.md) | Channel Brief load + app review | 1,461 contacts and 899 companies carry the brief; one build turn to fix Today, Overview, Companies, Prospecting |
 | 2026-09-18 | [01](2026-09-18-01-bizdave-efficiency-review.md) | bizDave efficiency review | Bridge has run once in 10 days; two inbox queues duplicating work; ranked fix list |
 | 2026-09-08 | [01](2026-09-08-01-super-agent-build.md) | The super agent | Six agents that write as David; voice from 287 sent messages; approval gate; command centre |
 | 2026-09-03 | [02](2026-09-03-02-repo-structure-settled.md) | Repo structure | Settled on one repo, projects as subfolders |
