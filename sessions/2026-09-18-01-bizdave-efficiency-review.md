@@ -107,27 +107,44 @@ Matching the no-email leads against contacts by name and LinkedIn URL linked **4
 them via `leads.contact_id`. The overlap is small, which is itself the answer: these are
 genuinely new names, not duplicates of people David knows.
 
-**The GTM picture, which was already in the app and nobody had read.** All 4,193 leads
-were already segmented into 15 `prospect_segments`. The reachability split is the
-finding:
+**The GTM picture — and a correction that matters more than anything else here.**
 
-| | Leads | Email | Reading |
+All 4,193 leads were already segmented into 15 `prospect_segments`. My first pass read
+the *labels* and reported the reachability split, calling the 1,567-name "Indie and DTC
+beauty brands, US" the largest and most on-strategy list and framing the missing emails
+as a sourcing decision. **That was wrong, and it was the expensive kind of wrong.** I
+described a list I had not opened.
+
+Audited on 2026-09-18 by reading the rows:
+
+| Segment | Leads | Email | What is actually in it |
 |---|---|---|---|
-| Indie and DTC beauty brands, US | 1,567 | **0** | Largest, most on-strategy, entirely LinkedIn-only |
-| Israel beauty directors and VPs | 1,000 | 1,000 | Largest immediately workable list |
-| Israel beauty founders | 500 | **0** | LinkedIn-only |
-| US cosmetics manufacturers | 300 | 300 | Competitors or partners — decide which |
-| Founders / BD partnerships | 40 | 0 | **All 40 already Contacts.** Warmest list here |
-| 6 others | 786 | 786 | Workable |
+| Indie and DTC beauty brands, US | 1,567 | 0 | **Scrape residue.** 7 beauty companies. 373 at twenty named mega-caps. 427 large-cap CEOs and chairs — Nadella, Fink, Dell, Bill Gates. ~half not US. Every LinkedIn value an obfuscated `ACoAA` member id |
+| Israel beauty directors and VPs | 1,000 | 1,000 | **Mislabelled.** Companies are disney.com, oracle.com, theatlantic.com. 7 beauty, few Israeli |
+| US cosmetics manufacturers and co-packers | 300 | 300 | On-label. 69 beauty companies. But co-packers compete with Cre8or's own factories as often as they partner |
+| RPG decision makers | 286 | 286 | On-label; promotional products and signage, not beauty |
+| Beauty decision makers | 150 | 150 | On-label. 48 beauty companies |
+| Agency decision makers | 150 | 150 | On-label. Agencies assemble brands and outsource making — the Front Row pattern |
+| Israel beauty and wellness | 87 | 87 | **Best list in the database.** Ahava Dead Sea Laboratories, Spa Cosmetics, Aviv Scientific |
+| Israel beauty owners | 67 | 67 | Mixed; several bare domains |
+| US cosmetics and packaging | 46 | 46 | Thin, mostly one company |
+| Founders / BD partnerships | 40 | 0 | All 40 already Contacts |
+| Israel beauty founders | 500 | 0 | Not re-audited — assume the same doubt as the other no-email list |
 | 4 starter templates | 0 | — | Never populated |
 
-**2,086 reachable by email; 2,107 reachable only through LinkedIn** — which is read-only
-to every agent by Gate 2. Half the prospect list cannot be worked through any automated
-path at all, and the half that cannot includes the segment closest to Cre8or's core
-offer. That is a strategy question for David, not a tooling one.
+**So roughly 2,567 of 4,193 rows — 61% — are in the two segments whose labels do not
+describe their contents, and those were the two I recommended.** The genuinely workable
+list is far smaller and better: about 490 names across Beauty decision makers, Agency
+decision makers, Israel beauty and wellness, and the co-packers, plus 40 warm ones he
+already knows.
 
-Each segment now carries this reading in its `notes`, so it is visible on the
-Prospecting screen rather than living only in this file.
+A methodological note worth keeping: the audit itself produced a false positive first.
+Searching titles for `hair` matched **Chair**man, which briefly made 88 Fortune 500 CEOs
+look like beauty contacts. Word boundaries matter when the answer is a business decision.
+
+Each segment now carries its audited reading in `notes`, visible on the Prospecting
+screen. The two bad lists are marked **DO NOT WORK THIS LIST** and **LABEL DOES NOT MATCH
+CONTENTS** so the label cannot mislead a future session the way it misled this one.
 
 ## The build — shipped
 
@@ -168,8 +185,11 @@ one more agent turn to fix — David's call whether that is worth a credit.
 3. Build the three tracker cards — see `docs/bizdave-build-brief.md`. Blocked here:
    `mcp__Lovable__send_message` was unavailable for most of this session, and it is the
    only way to change the app's code. The brief is one paste-ready message.
-4. `[OPEN]` The US indie/DTC list — 1,567 names, no emails, and the best fit for the
-   product. Source addresses, or accept it as a hand-worked motion?
+4. `[OPEN]` Where did the two bad lists come from? Both are `source='vibe'`, imported
+   2026-07-04. If that import tool produced 2,567 rows that do not match their requested
+   filters, that is worth knowing before buying more data from it.
+5. `[OPEN]` Work the 87-name Israel beauty and wellness list first? It is small, all
+   emailed, and genuinely on-label — the opposite of the lists volume suggested.
 5. `[OPEN]` `promoteLead` writes `probability: 10` onto every new deal. That is an
    invented number reaching a screen David reads. Worth removing.
 
