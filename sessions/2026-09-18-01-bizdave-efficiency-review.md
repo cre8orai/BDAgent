@@ -1,7 +1,11 @@
 # 2026-09-18 · bizDave efficiency review
 
 David asked how to improve bizDave (his Lovable app) and make the whole service cheaper
-to run. No code changed. This is the diagnosis and the ranked plan.
+to run, then asked for it as an interactive BD portal — assistant plus CRM, so he can see
+where each conversation stands.
+
+**The portal already existed. It was empty.** So the work was not building; it was
+connecting. `agents/sync_bizdave.py` now does that, and the pipeline is live in the app.
 
 ## Done
 
@@ -56,12 +60,43 @@ Row counts and last-write times, 2026-09-18:
   are safe to automate. They are display-only rows — nothing in that path transmits —
   but it is still a write to his live app, so it needs his yes first.
 
+## Built — `agents/sync_bizdave.py`
+
+bizDave already has 17 routes (`today`, `deals` + detail, `contacts`, `companies`,
+`tasks`, `meetings`, `prospecting`, `compose`, `ask`), an assistant with voice capture
+and Telegram, and Zoom + Gmail wired in. Asking Lovable to build a BD portal would have
+paid to rebuild what David already owns. The bridge was the missing piece:
+
+| Repo | bizDave |
+|---|---|
+| `people.csv` + threads-only accounts | `contacts` |
+| people + `threads.csv` | `deals` — stage, next step, who is waiting |
+| `threads.csv` | `activities` — history on each deal page |
+| `commitments.csv` | `tasks` — carrying David's verbatim promised words |
+| `questions.csv` | `pending_actions` — Gate 4, answered where he is |
+
+Applied 2026-09-18: **7 deals, 8 contacts, 4 activities, 5 tasks (4 overdue), 4
+questions.** Every deal is linked to its contact. `value` and `probability` are NULL
+throughout — Gate 5; a number nobody has agreed is not worth showing.
+
+Idempotent by construction: each run deletes its own `BDAgent`-tagged rows before
+writing, so re-running cannot double up and rows David created himself are untouched.
+Display rows only — no send path, and it cannot grow one.
+
+Two constraints in the app shaped the mapping, both worth knowing for future sessions:
+`contacts.category` is restricted to bizDave's own taxonomy (the repo's segment is kept
+verbatim in the notes instead), and `contacts.source` accepts only `manual` or
+`gmail_import`.
+
 ## Next
 
-1. David reviews the 12 drafts and 5 notifications now sitting in bizDave from 8 Sept.
-2. On his go-ahead: replace the print-SQL in `agents/bizdave.py` with a direct Supabase
-   write, and put it at the end of `cycle.sh`. Highest leverage, smallest change.
-3. Collapse the two inbox queues into one.
-4. Build the approve/answer surface in bizDave so the terminal stops being the gate.
+1. **David: the four questions and five overdue commitments are in bizDave now.** Nate
+   Cooper's materials are 11 days late and Avery Schwartz started without an address.
+2. Set `BIZDAVE_DB_URL` (the Supabase connection string) so `cycle.sh` runs the sync
+   unattended. Until then it prints SQL and changes nothing.
+3. Collapse the two inbox queues into one — the duplicated classification is the real
+   token cost.
+4. Approve/Kill/Edit and an answer box in bizDave, so `review.sh` stops being the gate
+   that contradicts Gate 4.
 
 Nothing was sent. Gate 1 untouched.
